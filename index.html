@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NuCal — Nuclear Medicine Toolkit</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0f14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NuCal">
+<link rel="apple-touch-icon" href="icon_192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f14;
+  --border:rgba(255,255,255,.18);
+  --border-hi:rgba(255,255,255,.26);
+  --accent:#3ea6ff;
+  --green:#59d98e;
+  --orange:#ffb84d;
+  --red:#ff6b6b;
+  --text:#f4faff;
+  --muted:#c8ddef;
+  --muted2:#e4f2ff;
+  --font-ui:'Be Vietnam Pro',system-ui,sans-serif;
+  --font-num:'JetBrains Mono',monospace;
+  --r:16px;--r-lg:22px;--r-xl:26px;
+}
+html{font-size:14px;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-ui);
+  background:#0a0f14;
+  min-height:100vh;color:var(--text);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(ellipse 140% 60% at 50% 0%,#152232 0%,#0a0f14 68%);
+  pointer-events:none;
+}
+.app{max-width:600px;margin:0 auto;padding:env(safe-area-inset-top,12px) 16px calc(40px + env(safe-area-inset-bottom,0))}
+
+/* ── Header ─────────────────────────────── */
+.app-header{text-align:center;padding:32px 0 20px;margin-bottom:20px}
+.header-brand{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:16px}
+.brand-logo{
+  display:flex;align-items:center;justify-content:center;
+  width:90px;height:90px;
+  background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);
+  border:1px solid rgba(143,211,255,.32);
+  border-radius:var(--r-lg);
+  box-shadow:0 0 0 1px rgba(62,166,255,.14),0 16px 36px rgba(0,0,0,.5);
+}
+.brand-title{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--text)}
+.brand-divider{
+  width:1px;height:88px;flex-shrink:0;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.38),transparent);
+}
+.brand-text{display:flex;flex-direction:column;gap:2px}
+.brand-text{text-align:left}
+.brand-subtitle{font-size:14px;font-weight:600;letter-spacing:.2px;line-height:1.4;color:var(--text);opacity:.72}
+@media(max-width:480px){
+  .brand-subtitle{font-size:14px}
+  .brand-divider{height:76px}
+}
+
+/* ── Panel ──────────────────────────────── */
+.panel{
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01)),rgba(20,28,40,.88);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border-hi);border-radius:var(--r-xl);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 12px 32px rgba(0,0,0,.42);
+  padding:18px;margin-bottom:12px;
+}
+.panel-title{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;
+}
+.panel-title span{font-family:var(--font-num);font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0;text-transform:none}
+
+/* ── Iso bar ────────────────────────────── */
+.iso-bar{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.iso-select{flex:0 0 58%}
+.iso-select label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.3px}
+.hl-card{
+  flex:1 1 auto;background:rgba(62,166,255,.12);border:1px solid rgba(62,166,255,.30);
+  border-radius:var(--r);padding:8px 12px;text-align:center;min-width:120px;
+}
+.hl-title{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--accent);margin-bottom:3px}
+.hl-value{font-family:var(--font-num);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
+
+/* ── Tabs ───────────────────────────────── */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:5px;
+  background:rgba(20,30,45,.92);border:1px solid var(--border);border-radius:var(--r-xl);margin-bottom:14px}
+.tab{background:transparent;border:1px solid transparent;border-radius:18px;color:var(--muted);cursor:pointer;
+  font-family:var(--font-ui);font-size:12px;font-weight:700;min-height:40px;padding:9px 6px;transition:all .18s}
+.tab:hover{color:var(--muted2)}
+.tab.active{background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);border-color:rgba(143,211,255,.32);color:#fff;box-shadow:0 0 0 1px rgba(62,166,255,.14),0 4px 14px rgba(0,0,0,.4)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fin .2s ease;min-height:60vh}
+@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Grid ───────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr .8fr;gap:8px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);display:block;text-align:center}
+
+/* ── Inputs ─────────────────────────────── */
+input,select{
+  width:100%;height:50px;background:rgba(255,255,255,.07);border:1px solid var(--border-hi);
+  border-radius:var(--r);color:#fff;font-family:var(--font-num);font-size:16px;font-weight:500;
+  text-align:center;text-align-last:center;outline:none;
+  transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.28);
+}
+input:focus,select:focus{border-color:rgba(62,166,255,.6);box-shadow:0 0 0 4px rgba(62,166,255,.12),inset 0 1px 3px rgba(0,0,0,.28)}
+input::placeholder{color:rgba(255,255,255,.22);font-weight:400}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b8cfe0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:28px;
+  font-family:var(--font-ui);font-size:14px;font-weight:700;color:var(--muted2);
+}
+/* time input with colon overlay */
+.time-wrap{position:relative;display:flex;align-items:center}
+.time-wrap input{padding-left:0;padding-right:0;letter-spacing:3px;font-size:18px}
+.time-colon{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-family:var(--font-num);font-size:20px;font-weight:700;color:rgba(255,255,255,.35);
+  pointer-events:none;user-select:none;line-height:1;margin-top:-1px;
+}
+.time-field{
+  font-size:18px!important;letter-spacing:2px!important;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+.time-field:focus{background:rgba(62,166,255,.10)}
+.input-invalid{border-color:rgba(255,107,107,.6)!important;background:rgba(255,107,107,.06)!important}
+
+/* ── Formula ─────────────────────────────── */
+.formula-box{margin-top:14px;margin-bottom:0;text-align:center}
+.formula-box summary{
+  cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;
+  list-style:none;display:flex;align-items:center;justify-content:center;gap:6px;user-select:none;
+}
+.formula-box summary::-webkit-details-marker{display:none}
+details[open]>.formula{display:block}
+.formula{
+  margin-top:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:10px;font-family:var(--font-num);font-size:13px;color:var(--muted2);text-align:center;
+}
+
+/* ── Divider ─────────────────────────────── */
+.panel-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ── Result grid ─────────────────────────── */
+.result-grid{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:4px}
+.result-card{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:13px 8px;text-align:center;transition:transform .2s;
+  overflow:hidden;min-width:0;
+}
+.result-card:active{transform:scale(.97)}
+.result-card.main{
+  background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);
+  border:1px solid rgba(143,211,255,.32);
+  box-shadow:0 0 0 1px rgba(62,166,255,.14),0 16px 36px rgba(0,0,0,.5);
+}
+.result-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.result-value{font-family:var(--font-num);font-weight:700;color:var(--muted2);margin-top:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%}
+.result-value.big{font-size:clamp(14px,5vw,32px);font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1;text-shadow:0 0 14px rgba(120,190,255,.22);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}
+.result-value.minus{color:var(--red);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.result-value.plus{color:var(--orange);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.result-unit{font-size:11px;font-weight:600;color:var(--muted);opacity:.78;margin-top:4px}
+
+/* ── Info rows ───────────────────────────── */
+.info-rows{padding-top:12px}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.ik{color:var(--muted);font-size:12px}
+.iv{font-family:var(--font-num);font-size:13px;font-weight:600;color:var(--muted2)}
+.iv.green{color:var(--green)}.iv.orange{color:var(--orange)}.iv.red{color:var(--red)}
+
+/* ── Utility classes ─────────────────────── */
+.hidden{display:none!important}
+.flex-end{display:flex;justify-content:flex-end;margin-bottom:10px}
+.grid-rv{grid-template-columns:.75fr 1.5fr!important}
+.grid-hl{grid-template-columns:1fr 1fr!important}
+.text-muted-xs{font-size:10px;color:var(--muted)}
+.panel-tight{padding:14px 16px;margin-bottom:12px}
+.mb-0{margin-bottom:0!important}
+.mb-10{margin-bottom:10px}
+.val-lg{font-size:28px!important}
+.val-md{font-size:22px!important;color:#fff!important}
+.val-rv{font-size:16px!important}
+.result-at{color:var(--green)}
+
+/* ── Quick table ─────────────────────────── */
+.quick-table{padding:16px}
+.qt-a0-header-wrap{text-align:center;margin-bottom:12px}
+.qt-a0-header{
+  display:inline-block;padding:6px 20px;
+  background:rgba(62,166,255,.10);border:1px solid rgba(62,166,255,.28);
+  border-radius:10px;font-size:13px;font-weight:600;color:var(--muted2);
+}
+.qt-head{
+  display:grid;grid-template-columns:1fr 1fr .7fr 1.3fr;gap:4px;
+  padding:7px 8px;font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--muted);text-align:center;
+}
+.qt-row{
+  display:grid;grid-template-columns:1fr 1fr .7fr 1.3fr;gap:4px;align-items:center;
+  padding:10px 8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;font-size:13px;text-align:center;margin-bottom:6px;
+}
+.qt-row:last-child{margin-bottom:0}
+.qt-time{color:var(--muted2);font-weight:600}
+.qt-val{font-family:var(--font-num);font-weight:700}
+.qt-pct{font-family:var(--font-num);font-size:12px}
+.bar-wrap{height:5px;background:rgba(255,255,255,.10);border-radius:999px;overflow:hidden;margin:0 4px}
+.bar-fill{height:100%;border-radius:999px;transition:width .5s ease}
+
+/* ── Chart ───────────────────────────────── */
+.chart-panel{padding:14px 16px 16px;overflow:hidden}
+canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
+
+/* ── Recent header (3-col) ───────────────── */
+.recent-header{
+  display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px;
+  padding:6px 10px 8px;font-size:11px;font-weight:700;letter-spacing:.3px;
+  color:var(--muted);text-align:center;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:8px;
+}
+
+/* ── RT boxes ────────────────────────────── */
+.rt-layout{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.rt-boxes{display:flex;flex-direction:column;gap:7px}
+.rt-box{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 13px;display:flex;justify-content:space-between;align-items:center;
+}
+.rt-box-label{font-size:12px;color:var(--muted);font-weight:500}
+.rt-box-value{font-family:var(--font-num);font-size:17px;font-weight:700}
+.arc-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.arc-label{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+
+/* ── Buttons ─────────────────────────────── */
+.btn{
+  width:100%;min-height:48px;margin-top:14px;
+  background:rgba(62,166,255,.18);border:1px solid rgba(62,166,255,.3);border-radius:var(--r);
+  color:#fff;cursor:pointer;font-family:var(--font-ui);font-size:14px;font-weight:700;transition:all .15s;
+}
+.btn:hover:not(:disabled){background:rgba(62,166,255,.28);box-shadow:0 5px 18px rgba(62,166,255,.2);transform:translateY(-1px)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn-sm{width:auto;min-height:32px;margin-top:0;font-size:12px;padding:0 13px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14)}
+.btn-sm:hover:not(:disabled){background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.3);color:var(--red);box-shadow:none;transform:none}
+
+/* ── History panel ───────────────────────── */
+.history-panel{
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),rgba(20,28,40,.88);
+  border:1px solid var(--border-hi);border-radius:var(--r-xl);margin-top:12px;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 8px 24px rgba(0,0,0,.36);
+}
+.history-toggle{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  background:none;border:none;color:var(--muted2);cursor:pointer;
+  font-family:var(--font-ui);font-size:13px;font-weight:700;padding:15px 18px;text-align:left;
+}
+.history-chevron{font-size:20px;color:var(--accent);font-weight:700;line-height:1;display:inline-block}
+.history-content{display:none;padding:0 16px 14px;max-height:420px;overflow-y:auto;overscroll-behavior:contain}
+.history-panel.open .history-content{display:block}
+
+/* ── Recent items (2-col: iso+body | time) ── */
+.recent-row{
+  display:grid;grid-template-columns:44px 1fr 44px;gap:8px;align-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;
+  padding:10px 10px;margin-bottom:7px;
+}
+.recent-row:last-child{margin-bottom:0}
+.rr-iso{font-family:var(--font-num);font-size:10px;font-weight:700;color:var(--accent);text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.3}
+.rr-body{min-width:0}
+.rr-ts{text-align:right;display:flex;flex-direction:column;align-items:flex-end;justify-content:center}
+.ri-body{flex:1;min-width:0}
+.ri-main{font-family:var(--font-num);font-size:12px;font-weight:700;color:#fff}
+.ri-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ri-ts{font-size:11px;color:var(--muted);white-space:nowrap;text-align:right;line-height:1.4;flex-shrink:0}
+.ri-ts-date{color:var(--muted2);font-weight:700;display:block;font-size:10px}
+.ri-ts-time{color:var(--muted);font-size:10px;display:block}
+
+/* ── Eval badges ─────────────────────────── */
+.eval-ok{color:var(--green);font-weight:700}
+.eval-warn{color:var(--orange);font-weight:700}
+.eval-bad{color:var(--red);font-weight:700}
+.empty-state{color:rgba(228,242,255,.55);font-size:12px;text-align:center;padding:20px 16px}
+/* ── Iso badge (history) ─────────────────── */
+.iso-badge{
+  display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;flex-shrink:0;
+  background:rgba(62,166,255,.12);border:1px solid rgba(62,166,255,.28);
+  border-radius:10px;
+  font-family:var(--font-num);font-size:10px;font-weight:700;
+  color:var(--accent);line-height:1.25;text-align:center;word-break:break-word;
+}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
+
+/* ── Responsive ──────────────────────────── */
+@media(max-width:480px){
+  .brand-title{font-size:22px}.brand-subtitle{font-size:14px}
+  .result-value.big{font-size:26px}.result-grid{gap:6px}
+  .grid-2,.grid-3{gap:8px}
+  .qt-head,.qt-row{grid-template-columns:1fr 1fr .7fr 1.3fr}
+  .rt-layout{grid-template-columns:1fr}.arc-wrap{display:none}
+  .tab{font-size:11px;min-height:38px}
+}
+
+/* ── QC Range Bar (Tab 3) ── */
+.qc-bar-wrap{margin:22px 0 2px;position:relative;height:5px}
+.qc-bar{height:5px;border-radius:3px;width:100%;opacity:.5;transition:opacity .3s ease;
+  background:linear-gradient(to right,
+    rgba(220,65,65,1)   0%,
+    rgba(215,130,35,1)  30%,
+    rgba(50,190,90,1)   50%,
+    rgba(215,130,35,1)  70%,
+    rgba(220,65,65,1)   100%
+  )}
+.qc-bar.active{opacity:.9}
+.qc-marker{position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:3px;height:13px;border-radius:2px;
+  background:rgba(228,242,255,.9);
+  box-shadow:0 0 4px rgba(0,0,0,.4);
+  transition:left .25s ease;pointer-events:none;display:none}
+.qc-label-row{display:flex;justify-content:space-between;
+  margin-top:4px;margin-bottom:14px;font-size:10px;opacity:.45;line-height:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── Header ─────────────────────────────────────── -->
+<header class="app-header">
+  <div class="header-brand">
+    <div class="brand-logo">
+      <div class="brand-title">NuCal</div>
+    </div>
+    <div class="brand-divider"></div>
+    <div class="brand-text">
+      <div class="brand-subtitle">Nuclear<br>Medicine<br>Toolkit</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Iso bar ────────────────────────────────────── -->
+<div class="panel panel-tight">
+  <div class="iso-bar">
+    <div class="iso-select">
+      <label>Đồng vị phóng xạ</label>
+      <select id="isotope" onchange="handleIsotopeChange()">
+        <option value="Tc99m">Tc-99m</option>
+        <option value="Ga68">Ga-68</option>
+        <option value="F18">F-18</option>
+        <option value="I131">I-131</option>
+        <option value="Lu177">Lu-177</option>
+      </select>
+    </div>
+    <div class="hl-card">
+      <div class="hl-title">T½</div>
+      <div class="hl-value" id="hl_display">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tabs ──────────────────────────────────────── -->
+<div class="tabs">
+  <button class="tab active" data-tab="decay">Phân rã</button>
+  <button class="tab" data-tab="activity">Hoạt độ</button>
+  <button class="tab" data-tab="tools">Công cụ</button>
+</div>
+
+<!-- ═══════════ TAB 1 — PHÂN RÃ ════════════════════ -->
+<section class="tab-content active" id="decay">
+
+  <div class="panel">
+    <div class="panel-title">Tính hoạt độ phân rã <span id="iso-label-decay">Tc-99m</span></div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Hoạt độ (A₀)</label>
+        <input type="text" inputmode="decimal" id="d_a0" placeholder="1000" maxlength="14" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this);calcDecay()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Đơn vị</label>
+        <select id="d_unit" onchange="calcDecay()">
+          <option value="mCi">mCi</option>
+          <option value="MBq">MBq</option>
+          <option value="GBq">GBq</option>
+          <option value="uCi">µCi</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Thời gian (t)</label>
+        <input type="text" inputmode="decimal" id="d_time" placeholder="0" maxlength="11" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this,6,4);calcDecay()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Đơn vị</label>
+        <select id="d_time_unit" onchange="calcDecay()">
+          <option value="min">phút</option>
+          <option value="hr">giờ</option>
+          <option value="day">ngày</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="panel-divider">
+    <div class="result-grid">
+      <div class="result-card">
+        <div class="result-label">−5%</div>
+        <div class="result-value minus" id="at_minus">—</div>
+        <div class="result-unit" id="at_minus_u">mCi</div>
+      </div>
+      <div class="result-card main">
+        <div class="result-label" style="text-transform:none">A(t)</div>
+        <div class="result-value big" id="at_main">—</div>
+        <div class="result-unit" id="at_main_u">mCi</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">+5%</div>
+        <div class="result-value plus" id="at_plus">—</div>
+        <div class="result-unit" id="at_plus_u">mCi</div>
+      </div>
+    </div>
+
+    <div id="d_info_panel" class="hidden">
+      <div class="info-rows">
+        <div class="info-row"><span class="ik">Hoạt độ còn lại</span><span class="iv green" id="d_pct">—</span></div>
+        <div class="info-row"><span class="ik">Số chu kỳ bán rã đã qua</span><span class="iv" id="d_hl_n">—</span></div>
+        <div class="info-row"><span class="ik">Hoạt độ đã phân rã</span><span class="iv orange" id="d_decayed">—</span></div>
+      </div>
+      <button class="btn" onclick="saveDecay()">Lưu kết quả</button>
+    </div>
+
+    <details class="formula-box">
+      <summary>ⓘ Công thức áp dụng</summary>
+      <div class="formula">A(t) = A₀ × exp(−ln2 · t / T½)</div>
+    </details>
+  </div>
+
+  <!-- Quick table -->
+  <div class="panel quick-table">
+    <div class="panel-title">Bảng phân rã nhanh <span id="qt_iso_label">Tc-99m</span></div>
+    <div class="qt-a0-header-wrap">
+      <div class="qt-a0-header hidden" id="qt_a0_header"></div>
+    </div>
+    <div class="qt-head">
+      <div>Thời gian</div><div>A(t)</div><div>%</div><div>Tiến trình</div>
+    </div>
+    <div id="qt_rows"><div class="empty-state">Nhập A₀ để xem bảng phân rã</div></div>
+  </div>
+
+  <!-- Chart -->
+  <div class="panel chart-panel">
+    <div class="panel-title">Đồ thị phân rã</div>
+    <canvas id="decayChart" class="decay-chart" height="160"></canvas>
+  </div>
+
+  <!-- History -->
+  <div class="history-panel" id="historyPanel">
+    <button class="history-toggle" onclick="toggleHistory()">
+      <span>Lịch sử gần đây</span>
+      <span class="history-chevron" id="histChev">+</span>
+    </button>
+    <div class="history-content">
+      <div class="flex-end">
+        <button class="btn btn-sm" onclick="if(confirm('Xóa toàn bộ lịch sử?'))clearRecent()">Xóa tất cả</button>
+      </div>
+      <div id="recentList"><div class="empty-state">Chưa có kết quả nào</div></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════ TAB 2 — HOẠT ĐỘ ════════════════════ -->
+<section class="tab-content" id="activity">
+
+  <!-- Realtime -->
+  <div class="panel">
+    <div class="panel-title">Hoạt độ theo thời gian thực <span id="iso-label-rt">Tc-99m</span></div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Hoạt độ (A₀)</label>
+        <input type="text" inputmode="decimal" id="rt_a0" placeholder="1000" maxlength="14" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this);calcRealtime()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Đơn vị</label>
+        <select id="rt_unit" onchange="calcRealtime()">
+          <option value="mCi">mCi</option>
+          <option value="MBq">MBq</option>
+          <option value="GBq">GBq</option>
+          <option value="uCi">µCi</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Thời điểm thực hiện</label>
+        <div class="time-wrap">
+          <input type="text" inputmode="numeric" id="rt_start" placeholder="08:00" maxlength="5"
+                 class="time-field"
+                 onfocus="this.select()"
+                 oninput="sanitizeTimeInput(this, event)" onblur="handleTimeBlur(this, calcRealtime)">
+        </div>
+      </div>
+      <div class="field">
+        <label>Thời điểm sử dụng</label>
+        <div class="time-wrap">
+          <input type="text" inputmode="numeric" id="rt_end" placeholder="11:00" maxlength="5"
+                 class="time-field"
+                 onfocus="this.select()"
+                 oninput="sanitizeTimeInput(this, event)" onblur="handleTimeBlur(this, calcRealtime)">
+        </div>
+      </div>
+    </div>
+
+    <hr class="panel-divider">
+    <div id="rt_results" style="opacity:.3;transition:opacity .25s">
+      <div class="rt-layout">
+        <div class="rt-boxes">
+          <div class="rt-box">
+            <span class="rt-box-label">Chênh lệch thời gian (Δt)</span>
+            <span class="rt-box-value" id="rt_delta">—</span>
+          </div>
+          <div class="rt-box">
+            <span class="rt-box-label">A(t) <span class="text-muted-xs" id="rt_unit_lbl">mCi</span></span>
+            <span class="rt-box-value result-at" id="rt_result">—</span>
+          </div>
+          <div class="rt-box">
+            <span class="rt-box-label">Còn lại</span>
+            <span class="rt-box-value" id="rt_pct">—</span>
+          </div>
+        </div>
+        <div class="arc-wrap">
+          <canvas id="rtArc" width="88" height="88"></canvas>
+          <div class="arc-label">Còn lại</div>
+        </div>
+      </div>
+    </div>
+    <button id="rt_save_btn" class="btn" disabled onclick="saveRealtime()">Lưu kết quả</button>
+
+    <details class="formula-box">
+      <summary>ⓘ Công thức áp dụng</summary>
+      <div class="formula">A(t) = A₀ × exp(−λ · Δt)</div>
+    </details>
+  </div>
+
+  <!-- Reverse -->
+  <div class="panel">
+    <div class="panel-title">Tính hoạt độ cần chuẩn bị</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Hoạt độ A(t)</label>
+        <input type="text" inputmode="decimal" id="rv_target" placeholder="20" maxlength="14" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this);calcReverse()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Đơn vị</label>
+        <select id="rv_unit" onchange="calcReverse()">
+          <option value="mCi">mCi</option>
+          <option value="MBq">MBq</option>
+          <option value="GBq">GBq</option>
+          <option value="uCi">µCi</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Thời điểm thực hiện</label>
+        <div class="time-wrap">
+          <input type="text" inputmode="numeric" id="rv_start" placeholder="07:30" maxlength="5"
+                 class="time-field"
+                 onfocus="this.select()"
+                 oninput="sanitizeTimeInput(this, event)" onblur="handleTimeBlur(this, calcReverse)">
+        </div>
+      </div>
+      <div class="field">
+        <label>Thời điểm sử dụng</label>
+        <div class="time-wrap">
+          <input type="text" inputmode="numeric" id="rv_end" placeholder="10:00" maxlength="5"
+                 class="time-field"
+                 onfocus="this.select()"
+                 oninput="sanitizeTimeInput(this, event)" onblur="handleTimeBlur(this, calcReverse)">
+        </div>
+      </div>
+    </div>
+
+    <hr class="panel-divider">
+    <div class="result-grid grid-rv mb-0">
+      <div class="result-card">
+        <div class="result-label">Δt</div>
+        <div class="result-value val-rv" id="rv_delta">—</div>
+      </div>
+      <div class="result-card main">
+        <div class="result-label">Cần chuẩn bị (A₀)</div>
+        <div class="result-value big" id="rv_result">—</div>
+      </div>
+    </div>
+
+    <details class="formula-box">
+      <summary>ⓘ Công thức áp dụng</summary>
+      <div class="formula">A₀ = A(t) × exp(+λ · Δt)</div>
+    </details>
+  </div>
+
+</section>
+
+<!-- ═══════════ TAB 3 — CÔNG CỤ ════════════════════ -->
+<section class="tab-content" id="tools">
+
+  <div class="panel">
+    <div class="panel-title">Kiểm tra chu kỳ bán rã <span id="iso-label-hl">Tc-99m</span></div>
+    <div class="grid-2 mb-10">
+      <div class="field">
+        <label>Hoạt độ (A₀)</label>
+        <input type="text" inputmode="decimal" id="h_a0" placeholder="1000" maxlength="14" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this);calcHalflife()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Hoạt độ A(t)</label>
+        <input type="text" inputmode="decimal" id="h_at" placeholder="1000" maxlength="14" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this);calcHalflife()" onblur="normalizeTrailingDot(this)">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Thời gian</label>
+        <input type="text" inputmode="decimal" id="h_t" placeholder="30" maxlength="11" onkeydown="handleCommaKey(this,event)" oninput="sanitizeActivityInput(this,6,4);calcHalflife()" onblur="normalizeTrailingDot(this)">
+      </div>
+      <div class="field">
+        <label>Đơn vị</label>
+        <select id="h_t_unit" onchange="calcHalflife()">
+          <option value="min">phút</option>
+          <option value="hr">giờ</option>
+          <option value="day">ngày</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="qc-bar-wrap">
+      <div class="qc-bar"></div>
+      <div class="qc-marker" id="h_qc_marker"></div>
+    </div>
+    <div class="qc-label-row"><span>−5%</span><span>−2%</span><span>0</span><span>+2%</span><span>+5%</span></div>
+    <div class="result-grid grid-hl mb-0">
+      <div class="result-card main">
+        <div class="result-label">T½ đo được</div>
+        <div class="result-value big val-lg" id="h_t12_smart">—</div>
+        <div class="result-unit" id="h_t12_smart_unit">—</div>
+      </div>
+      <div class="result-card">
+        <div class="result-label">Giá trị gốc</div>
+        <div class="result-value val-md" id="h_t12_min">—</div>
+        <div class="result-unit">phút</div>
+      </div>
+    </div>
+
+    <div id="h_info" class="hidden">
+      <div class="info-rows">
+        <div class="info-row"><span class="ik">T½ lý thuyết</span><span class="iv" id="h_theory">—</span></div>
+        <div class="info-row"><span class="ik">T½ đo được</span><span class="iv" id="h_actual">—</span></div>
+        <div class="info-row"><span class="ik">Độ lệch</span><span class="iv" id="h_diff">—</span></div>
+        <div class="info-row"><span class="ik">Kết quả QC</span><span class="iv" id="h_eval">—</span></div>
+      </div>
+      <button class="btn" onclick="saveHalflife()">Lưu kết quả</button>
+    </div>
+
+    <details class="formula-box">
+      <summary>ⓘ Công thức áp dụng</summary>
+      <div class="formula">T½ = (ln2 × t) / ln(A₀ / A(t))</div>
+    </details>
+  </div>
+
+</section>
+
+</div><!-- /app -->
+
+<script>
+/* ══════════ DATA ═══════════════════════════════ */
+const ISO={
+  Tc99m:{name:'Tc-99m',halfLife:360.492,  color:'#6cb6ff'},  // 6.00820 h (NNDC)
+  Ga68: {name:'Ga-68', halfLife:67.71,    color:'#f472b6'},  // 67.71 min (NNDC 2020)
+  F18:  {name:'F-18',  halfLife:109.771,  color:'#ffb84d'},  // 109.771 min (NNDC)
+  I131: {name:'I-131', halfLife:11549.808,color:'#59d98e'},  // 8.02070 d (NNDC)
+  Lu177:{name:'Lu-177',halfLife:9572.40,  color:'#c084fc'},  // 6.6475 d (IAEA)
+};
+const UF={mCi:1,MBq:37,GBq:0.037,uCi:1000};
+const UL={mCi:'mCi',MBq:'MBq',GBq:'GBq',uCi:'µCi'};
+
+/* ══════════ UNIT HELPERS ════════════════════════ */
+function getUnitFactor(unit){return UF[unit]||1}
+function getUnitLabel(unit){return UL[unit]||unit}
+function displayValue(raw,unit){return raw*getUnitFactor(unit)}
+function formatDisplay(raw,unit){return fmt(displayValue(raw,unit))+' '+getUnitLabel(unit)}
+
+function getPresets(hl){
+  if(hl<=360) return[
+    {l:'15 phút',t:15},{l:'30 phút',t:30},
+    {l:'1 giờ',t:60},{l:'2 giờ',t:120},
+    {l:'3 giờ',t:180},{l:'4 giờ',t:240},
+    {l:'6 giờ',t:360},{l:'12 giờ',t:720},
+    {l:'18 giờ',t:1080},{l:'24 giờ',t:1440},
+  ];
+  if(hl<=2880) return[
+    {l:'1 giờ',t:60},{l:'2 giờ',t:120},
+    {l:'4 giờ',t:240},{l:'6 giờ',t:360},
+    {l:'12 giờ',t:720},{l:'24 giờ',t:1440},
+    {l:'2 ngày',t:2880},{l:'3 ngày',t:4320},
+    {l:'5 ngày',t:7200},{l:'7 ngày',t:10080},
+  ];
+  return[
+    {l:'1 ngày',t:1440},{l:'2 ngày',t:2880},
+    {l:'3 ngày',t:4320},{l:'5 ngày',t:7200},
+    {l:'7 ngày',t:10080},{l:'10 ngày',t:14400},
+    {l:'14 ngày',t:20160},{l:'21 ngày',t:30240},
+    {l:'28 ngày',t:40320},{l:'42 ngày',t:60480},
+  ];
+}
+
+const STORAGE_KEY = 'nm_v7';
+let recentCalcs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+let _h={};
+
+/* ══════════ HELPERS ════════════════════════════ */
+function getIso(){return ISO[document.getElementById('isotope').value]}
+function getHL(){return getIso().halfLife}
+
+/* RTL time parser — on blur only, not while typing */
+function sanitizeTimeInput(el, e){
+  const isDeleting = e && (
+    e.inputType === 'deleteContentBackward' ||
+    e.inputType === 'deleteContentForward' ||
+    e.inputType === 'deleteByCut'
+  );
+
+  let v = el.value;
+
+  // Strip non-digits and colon for digit counting
+  const digits = v.replace(/\D/g, '').slice(0, 4);
+
+  if(isDeleting){
+    // Let user delete naturally — only strip truly invalid chars, don't rebuild ':'
+    // Remove anything that's not digit or ':'
+    let cleaned = v.replace(/[^0-9:]/g, '');
+    // Remove duplicate colons
+    const colonIdx = cleaned.indexOf(':');
+    if(colonIdx !== -1){
+      cleaned = cleaned.slice(0, colonIdx + 1) + cleaned.slice(colonIdx + 1).replace(/:/g, '');
+    }
+    // Enforce max length (5 chars: HH:MM)
+    cleaned = cleaned.slice(0, 5);
+    if(el.value !== cleaned) el.value = cleaned;
+    return;
+  }
+
+  // Typing: rebuild with auto-insert ':'
+  let built = digits.length >= 3
+    ? digits.slice(0,2) + ':' + digits.slice(2)
+    : digits;
+
+  if(el.value !== built) el.value = built;
+}
+function handleTimeBlur(el, triggerCalcFn) {
+  let raw = el.value.replace(/\D/g, '');
+
+  if (!raw) {
+    el.classList.remove('input-invalid');
+    triggerCalcFn();
+    return;
+  }
+
+  raw = raw.slice(0, 4).padStart(4, '0');
+
+  const h = parseInt(raw.slice(0, 2), 10);
+  const m = parseInt(raw.slice(2, 4), 10);
+
+  if (h > 23 || m > 59) {
+    el.classList.add('input-invalid');
+    triggerCalcFn();
+    return;
+  }
+
+  el.classList.remove('input-invalid');
+  el.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  triggerCalcFn();
+}
+
+/* Parse time string — respects input-invalid state */
+function parseTimeStr(val, el) {
+  if (el && el.classList.contains('input-invalid')) return null;
+
+  let s = String(val || '').replace(/\D/g, '');
+  if (!s) return null;
+
+  s = s.padStart(4, '0');
+  const h = parseInt(s.slice(0, 2), 10);
+  const m = parseInt(s.slice(2, 4), 10);
+
+  if (h > 23 || m > 59) return null;
+  return h * 60 + m;
+}
+function getTimeMins(elId) {
+  const el = document.getElementById(elId);
+  return parseTimeStr(el.value, el);
+}
+
+function clockDelta(sm,em){let d=em-sm;if(d<0)d+=1440;return d}
+
+function fmt(v){
+  if(!isFinite(v)||v==null)return'—';
+  if(v>=10000)return v.toFixed(0);
+  if(v>=1000) return v.toFixed(1);
+  if(v>=100)  return v.toFixed(2);
+  if(v>=10)   return v.toFixed(3);
+  return v.toFixed(4);
+}
+function decayFn(a0,tMin){return a0*Math.exp(-Math.LN2*tMin/getHL())}
+function toMins(val,unit){
+  const v=parseFloat(val);
+  if(!isFinite(v)||v<0)return 0;
+  if(unit==='hr')return v*60;
+  if(unit==='day')return v*1440;
+  return v;
+}
+function fmtDur(m){
+  if(!isFinite(m)||m<0)return'—';
+  m=Math.round(m);
+  if(m<60)return m+' phút';
+  const h=Math.floor(m/60),r=m%60;
+  if(h<24)return r>0?`${h}h ${r}ph`:`${h}h`;
+  const d=Math.floor(h/24),hr=h%24;
+  return hr>0?`${d}n ${hr}h`:`${d} ngày`;
+}
+function hlDisplay(hl){
+  if(hl<120)return hl.toFixed(1)+' phút';
+  if(hl<2880)return(hl/60).toFixed(2)+' giờ';
+  return(hl/1440).toFixed(2)+' ngày';
+}
+/* Format timestamp → two-line dd/mm/yy + HH:MM:SS */
+function fmtTs(){
+  // tsStr is from toLocaleString vi-VN
+  const d=new Date();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const hh=String(d.getHours()).padStart(2,'0');
+  const min=String(d.getMinutes()).padStart(2,'0');
+  return{date:`${dd}/${mm}`,time:`${hh}:${min}`};
+}
+
+/* ══════════ ISOTOPE ════════════════════════════ */
+function handleIsotopeChange(){
+  const iso=getIso();
+  document.getElementById('hl_display').textContent=hlDisplay(iso.halfLife);
+  ['iso-label-decay','iso-label-rt','iso-label-hl','qt_iso_label'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.textContent=iso.name;
+  });
+  calcDecay();calcRealtime();calcHalflife();
+}
+
+/* ══════════ TABS ═══════════════════════════════ */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ══════════ HISTORY ════════════════════════════ */
+function toggleHistory(){
+  const panel=document.getElementById('historyPanel');
+  panel.classList.toggle('open');
+  const ch=document.getElementById('histChev');
+  if(ch)ch.textContent=panel.classList.contains('open')?'−':'+';
+}
+function saveRecent(data){
+  const now=new Date();
+  const {date,time}=fmtTs();
+  recentCalcs.unshift({...data,isoKey:document.getElementById('isotope').value,tsDate:date,tsTime:time});
+  recentCalcs=recentCalcs.slice(0,20);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(recentCalcs));
+  renderRecent();
+}
+function clearRecent(){recentCalcs=[];localStorage.setItem(STORAGE_KEY,'[]');renderRecent()}
+function renderRecent(){
+  const list=document.getElementById('recentList');
+  if(!recentCalcs.length){list.innerHTML='<div class="empty-state">Chưa có kết quả nào</div>';return}
+  list.innerHTML=recentCalcs.map(e=>{
+    const iso=ISO[e.isoKey];
+    const isoName=iso?.name||e.isoKey||'';
+    const color=iso?.color||'#6cb6ff';
+    const uLb=getUnitLabel(e.unit||'mCi');
+    const mainLine=e.t12
+      ? `T½: ${fmt(e.t12)} ph`
+      : `A(t): ${formatDisplay(e.at,e.unit)}`;
+    const subLine=`A₀: ${fmt(displayValue(e.a0,e.unit))} ${uLb} | Δt: ${fmtDur(e.delta)}`;
+    const dateStr=e.tsDate||'';
+    const timeStr=e.tsTime||e.ts||'';
+    return`<div class="recent-row">
+      <div class="iso-badge" style="color:${color};background:${color}1a;border-color:${color}48">${isoName}</div>
+      <div class="rr-body">
+        <div class="ri-main">${mainLine}</div>
+        <div class="ri-sub">${subLine}</div>
+      </div>
+      <div class="rr-ts">
+        <div class="ri-ts-date">${dateStr}</div>
+        <div class="ri-ts-time">${timeStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════ TAB 1 — DECAY ══════════════════════ */
+/* Intercept comma keydown → insert dot at cursor position instead */
+function handleCommaKey(el, e){
+  if(e.key !== ',') return;
+  e.preventDefault();
+  const start = el.selectionStart, end = el.selectionEnd;
+  const v = el.value;
+  if(v.indexOf('.') !== -1) return; // dot already exists
+  el.value = v.slice(0, start) + '.' + v.slice(end);
+  el.selectionStart = el.selectionEnd = start + 1;
+  el.dispatchEvent(new Event('input'));
+}
+function sanitizeActivityInput(el, maxInt=9, maxDec=4){
+  let v = el.value;
+  // Smart comma handling:
+  // - single comma with ≠3 digits after → decimal separator (1000,5 → 1000.5)
+  // - single comma with exactly 3 digits after → thousands separator (1,000 → 1000)
+  // - multiple commas → strip all
+  const commaCount = (v.match(/,/g)||[]).length;
+  if(commaCount === 1){
+    const afterComma = v.split(',')[1] || '';
+    if(afterComma.length !== 3){
+      v = v.replace(',', '.'); // decimal comma
+    } else {
+      v = v.replace(/,/g, ''); // thousands separator
+    }
+  } else {
+    v = v.replace(/,/g, ''); // strip all
+  }
+  // Only digits and dot
+  v = v.replace(/[^0-9.]/g, '');
+  // Only one dot
+  const parts = v.split('.');
+  if(parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+  let [intPart, decPart] = v.split('.');
+  intPart = (intPart||'').slice(0, maxInt);
+  // Hard clamp: max 99999 (lâm sàng không vượt ngưỡng này)
+  if(intPart && parseFloat(intPart) > 99999) intPart = '99999';
+  if(decPart !== undefined){
+    decPart = decPart.slice(0, maxDec);
+    v = intPart + '.' + decPart;
+  } else {
+    v = intPart;
+  }
+  // Normalize leading dot → 0.xx (safe in oninput)
+  if(v.startsWith('.')) v = '0' + v;
+  el.value = v;
+}
+// Trailing dot cleanup on blur only — lets user type "12.5" without interruption
+function normalizeTrailingDot(el){
+  if(el.value.endsWith('.')) el.value = el.value.slice(0, -1);
+}
+function calcDecay(){
+  const a0=parseFloat(document.getElementById('d_a0').value);
+  const t=toMins(document.getElementById('d_time').value,document.getElementById('d_time_unit').value);
+  const uKey=document.getElementById('d_unit').value;
+  const uLb=getUnitLabel(uKey);
+  if(!isFinite(a0)||a0<=0){
+    ['at_main','at_minus','at_plus'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('d_info_panel').classList.add('hidden');
+    clearChart();buildQuickTable(0,uKey);return;
+  }
+  const at=decayFn(a0,t),pct=(at/a0)*100;
+  document.getElementById('at_main').textContent=fmt(displayValue(at,uKey));
+  document.getElementById('at_minus').textContent=fmt(displayValue(at*.95,uKey));
+  document.getElementById('at_plus').textContent=fmt(displayValue(at*1.05,uKey));
+  ['at_main_u','at_minus_u','at_plus_u'].forEach(id=>document.getElementById(id).textContent=uLb);
+  document.getElementById('d_info_panel').classList.remove('hidden');
+  document.getElementById('d_pct').textContent=pct.toFixed(2)+'%';
+  document.getElementById('d_hl_n').textContent=(t/getHL()).toFixed(3)+' T½';
+  document.getElementById('d_decayed').textContent=formatDisplay(a0-at,uKey);
+  buildQuickTable(a0,uKey);
+  drawDecayChart({a0,tCurrent:t,unitKey:uKey});
+}
+function saveDecay(){
+  const a0=parseFloat(document.getElementById('d_a0').value);
+  if(!isFinite(a0)||a0<=0)return;
+  const t=toMins(document.getElementById('d_time').value,document.getElementById('d_time_unit').value);
+  const uKey=document.getElementById('d_unit').value;
+  saveRecent({type:'Decay',a0,delta:t,at:decayFn(a0,t),unit:uKey});
+}
+
+function buildQuickTable(a0,uKey){
+  const rows=document.getElementById('qt_rows');
+  const hdrEl=document.getElementById('qt_a0_header');
+  const iso=getIso();
+  if(!isFinite(a0)||a0<=0){
+    rows.innerHTML='<div class="empty-state">Nhập A₀ để xem bảng phân rã</div>';
+    hdrEl.classList.add('hidden');return;
+  }
+  const uLb=getUnitLabel(uKey);
+  hdrEl.classList.remove('hidden');
+  hdrEl.innerHTML=`A₀ = <span style="color:#fff;font-weight:700">${fmt(displayValue(a0,uKey))} ${uLb}</span>`;
+  const presets=getPresets(iso.halfLife);
+  rows.innerHTML=presets.map(({l,t})=>{
+    const at=decayFn(a0,t),pct=(at/a0)*100;
+    const c=pct>60?'#59d98e':pct>30?'#ffb84d':'#ff6b6b';
+    return`<div class="qt-row">
+      <div class="qt-time">${l}</div>
+      <div class="qt-val" style="color:${c}">${fmt(displayValue(at,uKey))}</div>
+      <div class="qt-pct" style="color:${c}">${pct.toFixed(1)}%</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function clearChart(){
+  const cv=document.getElementById('decayChart');if(!cv)return;
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.parentElement.clientWidth||300,h=150;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='rgba(228,242,255,.55)';ctx.font='13px "Be Vietnam Pro",sans-serif';
+  ctx.textAlign='center';ctx.fillText('Nhập A₀ để xem đồ thị phân rã',w/2,h/2);
+}
+
+function drawDecayChart({a0,tCurrent,unitKey}){
+  const cv=document.getElementById('decayChart');if(!cv)return;
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.parentElement.clientWidth||300,h=150;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const hl=getHL(),iso=getIso(),color=iso.color;
+  const uF=getUnitFactor(unitKey),uLb=getUnitLabel(unitKey);
+  const a0disp=a0*uF;
+  const maxT=Math.max(hl*4,tCurrent*1.3,480);
+  const pad={l:58,r:14,t:14,b:24};
+  const cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;
+  const xS=cw/maxT,yS=ch/a0disp;
+  ctx.clearRect(0,0,w,h);
+  /* Y-axis gridlines + labels */
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch*i/4;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);
+    ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='rgba(184,207,224,.6)';ctx.font='9px monospace';ctx.textAlign='right';
+    ctx.fillText(fmt(a0disp*(1-i/4)),pad.l-3,y+3);
+  }
+  /* Half-life vertical guides */
+  for(let n=1;n*hl<=maxT;n++){
+    const x=pad.l+n*hl*xS;
+    ctx.setLineDash([2,5]);ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,h-pad.b);
+    ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+  }
+  /* Fill area */
+  const grad=ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+  grad.addColorStop(0,color+'2a');grad.addColorStop(1,'transparent');
+  ctx.beginPath();let first=true;
+  for(let i=0;i<=300;i++){
+    const t=(i/300)*maxT,x=pad.l+t*xS,y=h-pad.b-decayFn(a0,t)*uF*yS;
+    first?ctx.moveTo(x,y):ctx.lineTo(x,y);first=false;
+  }
+  ctx.lineTo(pad.l+maxT*xS,h-pad.b);ctx.lineTo(pad.l,h-pad.b);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  /* Curve */
+  const lg=ctx.createLinearGradient(pad.l,0,w-pad.r,0);
+  lg.addColorStop(0,color);lg.addColorStop(1,color+'99');
+  ctx.beginPath();first=true;
+  for(let i=0;i<=300;i++){
+    const t=(i/300)*maxT,x=pad.l+t*xS,y=h-pad.b-decayFn(a0,t)*uF*yS;
+    first?ctx.moveTo(x,y):ctx.lineTo(x,y);first=false;
+  }
+  ctx.strokeStyle=lg;ctx.lineWidth=2;ctx.stroke();
+  /* Current point marker */
+  if(tCurrent>=0&&tCurrent<=maxT){
+    const at=decayFn(a0,tCurrent),atDisp=at*uF;
+    const cx=pad.l+tCurrent*xS,cy=h-pad.b-atDisp*yS;
+    ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(cx,pad.t);ctx.lineTo(cx,h-pad.b);
+    ctx.strokeStyle=color+'44';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    const lbl=fmt(atDisp)+' '+uLb;
+    ctx.font='bold 10px monospace';ctx.textAlign='left';
+    const tw=ctx.measureText(lbl).width;
+    const lblH=13,lblPad=4;
+    // Default: label above-right of dot
+    let tx=cx+9,ty=cy-10;
+    // Flip left if near right edge
+    if(tx+tw+lblPad>w-pad.r) tx=cx-tw-9;
+    // If label box goes above top padding, place below dot instead
+    if(ty-lblH<pad.t) ty=cy+20;
+    // Background pill
+    ctx.fillStyle='rgba(8,14,22,.92)';
+    const rx=tx-lblPad,ry=ty-lblH+2,rw=tw+lblPad*2,rh=lblH+2;
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(rx,ry,rw,rh,4):ctx.fillRect(rx,ry,rw,rh);
+    ctx.fill();
+    ctx.strokeStyle=color+'55';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=color;ctx.fillText(lbl,tx,ty);
+  }
+  /* X-axis time labels */
+  const step=maxT<=480?60:maxT<=2880?360:maxT<=10080?1440:2880;
+  ctx.fillStyle='rgba(184,207,224,.55)';ctx.font='9px monospace';ctx.textAlign='center';
+  for(let t=0;t<=maxT;t+=step){
+    const lbl=t<60?t+'m':t<1440?(t/60)+'h':Math.round(t/1440)+'d';
+    ctx.fillText(lbl,pad.l+t*xS,h-5);
+  }
+}
+
+/* ══════════ TAB 2 — REALTIME ════════════════════ */
+function calcRealtime(){
+  const a0=parseFloat(document.getElementById('rt_a0').value);
+  const uKey=document.getElementById('rt_unit').value;
+  const sm=getTimeMins('rt_start');
+  const em=getTimeMins('rt_end');
+  const pan=document.getElementById('rt_results');
+  const btn=document.getElementById('rt_save_btn');
+  if(!isFinite(a0)||a0<=0||sm===null||em===null){pan.style.opacity='.3';btn.disabled=true;return}
+  const delta=clockDelta(sm,em);
+  const at=decayFn(a0,delta),pct=(at/a0)*100;
+  const uLb=getUnitLabel(uKey);
+  pan.style.opacity='1';
+  document.getElementById('rt_delta').textContent=fmtDur(delta);
+  document.getElementById('rt_result').textContent=fmt(displayValue(at,uKey));
+  document.getElementById('rt_unit_lbl').textContent=uLb;
+  const pctEl=document.getElementById('rt_pct');
+  pctEl.textContent=pct.toFixed(2)+'%';
+  pctEl.style.color=pct>60?'var(--green)':pct>30?'var(--orange)':'var(--red)';
+  drawArc(pct);
+  btn.disabled=false;btn.dataset.a0=a0;btn.dataset.delta=delta;btn.dataset.at=at;btn.dataset.unit=uKey;
+}
+function saveRealtime(){
+  const btn=document.getElementById('rt_save_btn');
+  saveRecent({type:'Realtime',a0:+btn.dataset.a0,delta:+btn.dataset.delta,at:+btn.dataset.at,unit:btn.dataset.unit});
+}
+function drawArc(pct){
+  const cv=document.getElementById('rtArc');if(!cv)return;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=cv.height=88*dpr;cv.style.width=cv.style.height='88px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const cx=44,cy=44,r=34,c=pct>60?'#59d98e':pct>30?'#ffb84d':'#ff6b6b';
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=7;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,(pct/100)*Math.PI*2-Math.PI/2);
+  ctx.strokeStyle=c;ctx.lineWidth=7;ctx.lineCap='round';ctx.stroke();
+  ctx.fillStyle=c;ctx.font='bold 13px monospace';ctx.textAlign='center';
+  ctx.fillText(pct.toFixed(0)+'%',cx,cy+5);
+}
+
+function calcReverse(){
+  const target=parseFloat(document.getElementById('rv_target').value);
+  const uKey=document.getElementById('rv_unit').value;
+  const pm=getTimeMins('rv_start');
+  const um=getTimeMins('rv_end');
+  if(!isFinite(target)||target<=0||pm===null||um===null){
+    document.getElementById('rv_result').textContent='—';
+    document.getElementById('rv_delta').textContent='—';return;
+  }
+  const delta=clockDelta(pm,um);
+  /* target is in display units → convert to raw mCi first */
+  const targetRaw=target/getUnitFactor(uKey);
+  const needed=targetRaw*Math.exp(Math.LN2*delta/getHL());
+  document.getElementById('rv_result').textContent=formatDisplay(needed,uKey);
+  document.getElementById('rv_delta').textContent=fmtDur(delta);
+}
+
+/* ══════════ TAB 3 — HALF-LIFE ══════════════════ */
+function calcHalflife(){
+  const a0=parseFloat(document.getElementById('h_a0').value);
+  const at=parseFloat(document.getElementById('h_at').value);
+  const tRaw=parseFloat(document.getElementById('h_t').value);
+  const tUnit=document.getElementById('h_t_unit')?.value||'min';
+  const t=toMins(tRaw,tUnit);
+  if(!isFinite(t)||!isFinite(a0)||!isFinite(at)||at>=a0||a0<=0||at<=0||t<=0){
+    document.getElementById('h_t12_smart').textContent='—';
+    document.getElementById('h_t12_smart_unit').textContent='—';
+    document.getElementById('h_t12_min').textContent='—';
+    document.getElementById('h_info').classList.add('hidden');
+    const mr=document.getElementById('h_qc_marker');mr.style.display='none';
+    document.querySelector('.qc-bar').classList.remove('active');return;
+  }
+  const t12=(Math.LN2*t)/Math.log(a0/at),t12hr=t12/60,theory=getHL();
+  const diff=t12-theory,diffPct=(diff/theory)*100,absD=Math.abs(diffPct);
+  // Smart unit for main card
+  let smartVal, smartUnit;
+  if(t12 < 180){ smartVal=fmt(t12); smartUnit='phút'; }
+  else if(t12 < 2880){ smartVal=(t12/60).toFixed(3); smartUnit='giờ'; }
+  else { smartVal=(t12/1440).toFixed(3); smartUnit='ngày'; }
+  document.getElementById('h_t12_smart').textContent=smartVal;
+  document.getElementById('h_t12_smart_unit').textContent=smartUnit;
+  document.getElementById('h_t12_min').textContent=fmt(t12);
+  document.getElementById('h_info').classList.remove('hidden');
+  document.getElementById('h_theory').textContent=fmt(theory)+' phút';
+  document.getElementById('h_actual').textContent=fmt(t12)+' phút';
+  document.getElementById('h_diff').textContent=(diff>0?'+':'')+diff.toFixed(2)+' ph ('+diffPct.toFixed(1)+'%)';
+  let evalHTML;
+  if(absD<2)evalHTML='<span class="eval-ok">Đạt — Sai lệch &lt;2%</span>';
+  else if(absD<5)evalHTML='<span class="eval-warn">Cần xem lại — Sai lệch 2–5%</span>';
+  else evalHTML='<span class="eval-bad">Không đạt — Sai lệch &gt;5%</span>';
+  document.getElementById('h_eval').innerHTML=evalHTML;
+  // QC range bar marker: ±5% maps to 0–100% of bar
+  const marker=document.getElementById('h_qc_marker');
+  const clampedPct=Math.max(-5,Math.min(5,diffPct));
+  const barPos=((clampedPct+5)/10)*100;
+  marker.style.left=barPos+'%';
+  marker.style.display='block';
+  document.querySelector('.qc-bar').classList.add('active');
+  _h={a0,at,t,t12};
+}
+function saveHalflife(){
+  if(!_h.t12) return;
+  const currentUnit = document.getElementById('d_unit').value;
+  saveRecent({type:'Half-life',a0:_h.a0,delta:_h.t,at:_h.at,t12:_h.t12,unit:currentUnit});
+}
+
+/* ══════════ INIT ═══════════════════════════════ */
+renderRecent();clearChart();
+const _u0=document.getElementById('d_unit').value;
+buildQuickTable(0,_u0);
+handleIsotopeChange();
+
+/* ── PWA: Register Service Worker ── */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(r => console.log('[NuCal] SW registered:', r.scope))
+      .catch(e => console.warn('[NuCal] SW registration failed:', e));
+  });
+}
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{
+    const a0 = parseFloat(document.getElementById('d_a0').value);
+    const t = toMins(
+      document.getElementById('d_time').value,
+      document.getElementById('d_time_unit').value
+    );
+    const uKey = document.getElementById('d_unit').value;
+    if(isFinite(a0) && a0 > 0){
+      drawDecayChart({a0, tCurrent:t, unitKey:uKey});
+    } else {
+      clearChart();
+    }
+  }, 120);
+});
+</script>
+</body>
+</html>
