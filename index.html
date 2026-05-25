@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>NuCal — Nuclear Medicine Toolkit</title>
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0f14">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NuCal">
-<link rel="apple-touch-icon" href="icon_192.png">
+<meta name="theme-color" content="#0a0f14">
+<meta name="description" content="Bộ công cụ tính toán y học hạt nhân: phân rã phóng xạ, hoạt độ, kiểm tra chu kỳ bán rã.">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<title>NuCal — Nuclear Medicine Toolkit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -51,13 +53,13 @@ body::before{
 .header-brand{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:16px}
 .brand-logo{
   display:flex;align-items:center;justify-content:center;
-  width:90px;height:90px;
+  width:90px;height:90px;flex-shrink:0;overflow:hidden;
   background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);
   border:1px solid rgba(143,211,255,.32);
   border-radius:var(--r-lg);
   box-shadow:0 0 0 1px rgba(62,166,255,.14),0 16px 36px rgba(0,0,0,.5);
 }
-.brand-title{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--text)}
+.brand-title{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--text);white-space:nowrap;max-width:82px;text-align:center}
 .brand-divider{
   width:1px;height:88px;flex-shrink:0;
   background:linear-gradient(to bottom,transparent,rgba(255,255,255,.38),transparent);
@@ -339,6 +341,39 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
   transition:left .25s ease;pointer-events:none;display:none}
 .qc-label-row{display:flex;justify-content:space-between;
   margin-top:4px;margin-bottom:14px;font-size:10px;opacity:.45;line-height:1}
+
+/* ── PWA Install Banner ──────────────────── */
+.pwa-banner{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);
+  width:min(560px,100vw);
+  background:linear-gradient(135deg,rgba(20,35,55,.97),rgba(10,20,34,.99));
+  border:1px solid rgba(62,166,255,.32);border-bottom:none;
+  border-radius:18px 18px 0 0;
+  padding:14px 16px calc(14px + env(safe-area-inset-bottom,0));
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 -8px 32px rgba(0,0,0,.5);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:9999;
+}
+.pwa-banner.show{transform:translateX(-50%) translateY(0)}
+.pwa-banner-icon{font-size:28px;flex-shrink:0;line-height:1;color:var(--accent)}
+.pwa-banner-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pwa-banner-text strong{font-size:13px;font-weight:700;color:#fff}
+.pwa-banner-text span{font-size:11px;color:var(--muted)}
+.pwa-btn-install{
+  flex-shrink:0;height:36px;padding:0 16px;
+  background:rgba(62,166,255,.22);border:1px solid rgba(62,166,255,.4);border-radius:10px;
+  color:#fff;font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+.pwa-btn-install:hover{background:rgba(62,166,255,.38)}
+.pwa-btn-dismiss{
+  flex-shrink:0;width:30px;height:30px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);border-radius:8px;
+  color:var(--muted);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;padding:0;
+}
 </style>
 </head>
 <body>
@@ -685,6 +720,17 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
 
 </section>
 
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" class="pwa-banner">
+  <div class="pwa-banner-icon">⚛︎</div>
+  <div class="pwa-banner-text">
+    <strong>Cài đặt NuCal</strong>
+    <span>Dùng offline, không cần mạng</span>
+  </div>
+  <button id="pwa-install-btn" class="pwa-btn-install">Cài đặt</button>
+  <button id="pwa-dismiss-btn" class="pwa-btn-dismiss" aria-label="Đóng">✕</button>
+</div>
 </div><!-- /app -->
 
 <script>
@@ -1233,15 +1279,6 @@ renderRecent();clearChart();
 const _u0=document.getElementById('d_unit').value;
 buildQuickTable(0,_u0);
 handleIsotopeChange();
-
-/* ── PWA: Register Service Worker ── */
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(r => console.log('[NuCal] SW registered:', r.scope))
-      .catch(e => console.warn('[NuCal] SW registration failed:', e));
-  });
-}
 let resizeTimer;
 window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
@@ -1258,6 +1295,52 @@ window.addEventListener('resize',()=>{
       clearChart();
     }
   }, 120);
+});
+</script>
+
+<script>
+/* ═══ PWA: Service Worker Registration ═══ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[NuCal PWA] SW registered:', reg.scope))
+      .catch(err => console.warn('[NuCal PWA] SW failed:', err));
+  });
+}
+
+/* ═══ PWA: Install prompt ═══ */
+let deferredPrompt = null;
+const installBanner = document.getElementById('pwa-install-banner');
+const installBtn = document.getElementById('pwa-install-btn');
+const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBanner && !localStorage.getItem('pwa-dismissed')) {
+    installBanner.classList.add('show');
+  }
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBanner.classList.remove('show');
+  });
+}
+if (dismissBtn) {
+  dismissBtn.addEventListener('click', () => {
+    installBanner.classList.remove('show');
+    localStorage.setItem('pwa-dismissed', '1');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  if (installBanner) installBanner.classList.remove('show');
+  console.log('[NuCal PWA] App installed');
 });
 </script>
 </body>
