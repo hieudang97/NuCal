@@ -98,15 +98,37 @@ body::before{
 .hl-value{font-family:var(--font-num);font-size:14px;font-weight:700;color:#fff;white-space:nowrap}
 
 /* ── Tabs ───────────────────────────────── */
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:5px;
+/* Apple sliding pill */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;position:relative;
   background:rgba(20,30,45,.92);border:1px solid var(--border);border-radius:var(--r-xl);margin-bottom:14px}
-.tab{background:transparent;border:1px solid transparent;border-radius:18px;color:var(--muted);cursor:pointer;
-  font-family:var(--font-ui);font-size:12px;font-weight:700;min-height:40px;padding:9px 6px;transition:all .18s}
+.tab-pill{
+  position:absolute;top:4px;bottom:4px;left:4px;border-radius:15px;
+  background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);
+  border:1px solid rgba(143,211,255,.32);
+  box-shadow:0 0 0 1px rgba(62,166,255,.14),0 4px 14px rgba(0,0,0,.4);
+  transition:transform .3s cubic-bezier(0.34,1.15,0.64,1);
+  pointer-events:none;will-change:transform;
+}
+.tab{background:transparent;border:none;border-radius:15px;color:var(--muted);cursor:pointer;
+  font-family:var(--font-ui);font-size:12px;font-weight:700;min-height:40px;padding:9px 6px;
+  position:relative;z-index:1;transition:color .2s ease;-webkit-tap-highlight-color:transparent}
 .tab:hover{color:var(--muted2)}
-.tab.active{background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);border-color:rgba(143,211,255,.32);color:#fff;box-shadow:0 0 0 1px rgba(62,166,255,.14),0 4px 14px rgba(0,0,0,.4)}
-.tab-content{display:none}
-.tab-content.active{display:block;animation:fin .2s ease;min-height:60vh}
-@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tab.active{color:#fff}
+
+/* Tab panels wrapper */
+.tab-panels{position:relative;min-height:60vh}
+
+/* Content: opacity+visibility, KHONG dung display:none */
+.tab-content{
+  opacity:0;visibility:hidden;transform:translateY(6px);
+  transition:opacity .2s ease,transform .25s cubic-bezier(0.25,1,0.5,1),visibility 0s linear .2s;
+  position:absolute;top:0;left:0;width:100%;pointer-events:none;
+}
+.tab-content.active{
+  opacity:1;visibility:visible;transform:translateY(0);
+  transition:opacity .22s ease,transform .28s cubic-bezier(0.25,1,0.5,1),visibility 0s linear 0s;
+  position:relative;pointer-events:auto;
+}
 
 /* ── Grid ───────────────────────────────── */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
@@ -413,12 +435,14 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
 </div>
 
 <!-- ── Tabs ──────────────────────────────────────── -->
-<div class="tabs">
+<div class="tabs" id="tabBar">
+  <div class="tab-pill" id="tabPill"></div>
   <button class="tab active" data-tab="decay">Phân rã</button>
   <button class="tab" data-tab="activity">Hoạt độ</button>
   <button class="tab" data-tab="tools">Công cụ</button>
 </div>
 
+<div class="tab-panels">
 <!-- ═══════════ TAB 1 — PHÂN RÃ ════════════════════ -->
 <section class="tab-content active" id="decay">
 
@@ -719,6 +743,7 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
   </div>
 
 </section>
+</div><!-- /tab-panels -->
 
 
 <!-- PWA Install Banner -->
@@ -915,15 +940,40 @@ function handleIsotopeChange(){
   calcDecay();calcRealtime();calcHalflife();
 }
 
-/* ══════════ TABS ═══════════════════════════════ */
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    document.getElementById(tab.dataset.tab).classList.add('active');
+/* ══════════ TABS — Apple style ═════════════════ */
+(function(){
+  const tabs = document.querySelectorAll('.tab');
+  const pill  = document.getElementById('tabPill');
+  const bar   = document.getElementById('tabBar');
+  let active  = document.querySelector('.tab.active');
+
+  function movePill(btn){
+    const slotW = bar.clientWidth / tabs.length;
+    const idx   = Array.from(tabs).indexOf(btn);
+    pill.style.width     = (slotW - 8) + 'px';
+    pill.style.transform = 'translateX(' + (idx * slotW + 4) + 'px)';
+  }
+
+  // Init: set vi tri khong co transition de tranh pill chay tu goc trai
+  pill.style.transition = 'none';
+  requestAnimationFrame(()=>{
+    movePill(active);
+    requestAnimationFrame(()=>{ pill.style.transition = ''; });
   });
-});
+  window.addEventListener('resize', ()=>movePill(active));
+
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      if(tab === active) return;
+      movePill(tab);
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(active.dataset.tab).classList.remove('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+      active = tab;
+    });
+  });
+})();
 
 /* ══════════ HISTORY ════════════════════════════ */
 function toggleHistory(){
