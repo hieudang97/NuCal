@@ -141,7 +141,7 @@ body::before{
 /* Tab transition — cross-dissolve không reflow
    Tất cả tab-content đều absolute → không đổi position → không reflow
    .tab-panels giữ height bằng JS theo tab active */
-.tab-panels{position:relative;overflow:hidden;transition:height 220ms var(--ease-standard)}
+.tab-panels{position:relative;transition:height 220ms var(--ease-standard)}
 .tab-content{
   opacity:0;
   pointer-events:none;
@@ -389,35 +389,24 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
 }
 .history-chevron{font-size:20px;color:var(--accent);font-weight:700;line-height:1;display:inline-block}
 .history-content{
-  /* Animated layer: chỉ opacity + max-height
-     Tách hoàn toàn khỏi scroll layer bên trong */
   overflow:hidden;
-  max-height:0;
+  height:0;
   opacity:0;
-  will-change:opacity,max-height;
-  /* Đóng: opacity trước → collapse sau */
   transition:
-    opacity    100ms var(--ease-standard),
-    max-height 200ms var(--ease-standard) 80ms;
+    height  260ms var(--ease-premium),
+    opacity 180ms var(--ease-standard);
   pointer-events:none;
 }
 .history-content > .history-inner{
-  /* Scroll layer — không animate, không có transition
-     Browser giữ layer này ổn định */
   padding:0 16px 14px;
-  max-height:420px;
-  overflow-y:auto;
   overscroll-behavior:contain;
-  contain:layout style;
 }
 .history-panel.open .history-content{
-  max-height:440px;
   opacity:1;
   pointer-events:auto;
-  /* Mở: expand → opacity vào theo */
   transition:
-    max-height 220ms var(--ease-standard),
-    opacity    160ms var(--ease-standard) 40ms;
+    height  280ms var(--ease-premium),
+    opacity 200ms var(--ease-standard) 40ms;
 }
 
 /* ── Recent items (2-col: iso+body | time) ── */
@@ -1098,6 +1087,7 @@ function handleIsotopeChange(){
   }
 
   const panelsWrap = document.querySelector('.tab-panels');
+  window._panelsWrap = panelsWrap;
 
   // Giữ height của wrapper = height tab đang active
   // defer sang rAF để tránh forced synchronous layout
@@ -1148,10 +1138,27 @@ function handleIsotopeChange(){
 
 /* ══════════ HISTORY ════════════════════════════ */
 function toggleHistory(){
-  const panel=document.getElementById('historyPanel');
-  panel.classList.toggle('open');
-  const ch=document.getElementById('histChev');
-  if(ch)ch.textContent=panel.classList.contains('open')?'−':'+';
+  const panel   = document.getElementById('historyPanel');
+  const content = panel.querySelector('.history-content');
+  const inner   = panel.querySelector('.history-inner');
+  const isOpen  = panel.classList.toggle('open');
+  const ch      = document.getElementById('histChev');
+  if(ch) ch.textContent = isOpen ? '−' : '+';
+
+  if(isOpen){
+    // Đo chiều cao thực tế của inner rồi animate lên
+    const targetH = inner.offsetHeight;
+    content.style.height = targetH + 'px';
+    // Cập nhật wrapper tab-panels sau khi expand xong
+    setTimeout(()=>{
+      if(window._panelsWrap){
+        const activeTab = document.querySelector('.tab-content.active');
+        if(activeTab) window._panelsWrap.style.height = activeTab.offsetHeight + 'px';
+      }
+    }, 300);
+  } else {
+    content.style.height = '0px';
+  }
 }
 function saveRecent(data){
   const now=new Date();
