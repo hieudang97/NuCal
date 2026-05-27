@@ -122,14 +122,14 @@ body::before{
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;position:relative;
   background:rgba(20,30,45,.92);border:1px solid var(--border);border-radius:var(--r-xl);margin-bottom:14px}
 .tab-pill{
-  position:absolute;top:4px;bottom:4px;left:4px;border-radius:15px;
+  position:absolute;top:4px;bottom:4px;left:0;border-radius:calc(var(--r-xl) - 4px);
   background:linear-gradient(175deg,rgba(32,54,84,.94) 0%,rgba(10,24,46,.97) 100%);
   border:1px solid rgba(143,211,255,.32);
   box-shadow:0 0 0 1px rgba(62,166,255,.14),0 4px 14px rgba(0,0,0,.4);
   transition:transform var(--dur-slow) var(--ease-spring);
   pointer-events:none;will-change:transform;
 }
-.tab{background:transparent;border:none;border-radius:15px;color:var(--muted);cursor:pointer;
+.tab{background:transparent;border:none;border-radius:calc(var(--r-xl) - 4px);color:var(--muted);cursor:pointer;
   font-family:var(--font-ui);font-size:12px;font-weight:700;min-height:40px;padding:9px 6px;
   position:relative;z-index:1;transition:color var(--motion-normal) var(--ease-standard);-webkit-tap-highlight-color:transparent}
 .tab:hover{color:var(--muted2)}
@@ -138,35 +138,20 @@ body::before{
 /* Tab panels wrapper */
 .tab-panels{position:relative}
 
-/* Tab transition — Apple cross-dissolve
-   will-change trên TẤT CẢ tab-content (kể cả inactive)
-   → browser promote lên GPU layer ngay từ đầu
-   → không bị invalidate/repromote khi class thay đổi
-   → cross-dissolve sạch, không flash */
+/* Tab transition — cross-dissolve không reflow
+   Tất cả tab-content đều absolute → không đổi position → không reflow
+   .tab-panels giữ height bằng JS theo tab active */
+.tab-panels{position:relative;overflow:hidden;transition:height 220ms var(--ease-standard)}
 .tab-content{
   opacity:0;
-  visibility:hidden;
-  transform:translateY(4px);
-  transition:
-    opacity    150ms var(--ease-standard),
-    transform  200ms var(--ease-standard),
-    visibility 0s    linear 150ms;
-  position:absolute;top:0;left:0;width:100%;
   pointer-events:none;
-  will-change:opacity,transform;
-  backface-visibility:hidden;
+  transition:opacity 180ms var(--ease-standard);
+  position:absolute;top:0;left:0;width:100%;
 }
 .tab-content.active{
   opacity:1;
-  visibility:visible;
-  transform:translateY(0);
-  transition:
-    opacity    200ms var(--ease-standard),
-    transform  240ms var(--ease-premium),
-    visibility 0s    linear 0s;
-  position:relative;
   pointer-events:auto;
-  /* Giữ will-change — không reset về auto giữa transitions */
+  will-change:opacity;
 }
 
 /* ── Grid ───────────────────────────────── */
@@ -544,23 +529,10 @@ canvas.decay-chart{display:block;width:100%;max-width:100%;border-radius:8px}
   }
   /* Giữ lại opacity fade nhẹ cho tab content — UX cần thiết */
   .tab-content{
-    transition:opacity 120ms linear,
-               visibility 0s linear 120ms !important;
-    transform:none !important;
+    transition:opacity 120ms linear !important;
   }
   .tab-content.active{
-    transition:opacity 120ms linear,
-               visibility 0s linear 0s !important;
-    transform:none !important;
-  }
-  /* Pill không animate — nhảy thẳng tới vị trí */
-  .tab-pill{transition:none !important}
-  /* Stagger panels: không transform, chỉ fade nhanh */
-  .tab-content.active .panel,
-  .tab-content.active .history-panel{
-    animation:none !important;
-    opacity:1 !important;
-    transform:none !important;
+    transition:opacity 120ms linear !important;
   }
 }
 </style>
@@ -1115,39 +1087,24 @@ function handleIsotopeChange(){
   const pill   = document.getElementById('tabPill');
   const bar    = document.getElementById('tabBar');
   let active   = document.querySelector('.tab.active');
-  // Track tab đã visit — stagger chỉ chạy lần đầu
-  const visited = new Set([active.dataset.tab]);
 
   function movePill(btn){
-    const slotW = bar.clientWidth / tabs.length;
-    const idx   = Array.from(tabs).indexOf(btn);
-    pill.style.width     = (slotW - 8) + 'px';
-    pill.style.transform = 'translateX(' + (idx * slotW + 4) + 'px)';
+    const padding = 4; // khớp với .tabs { padding: 4px }
+    const innerW  = bar.clientWidth - padding * 2;
+    const slotW   = innerW / tabs.length;
+    const idx     = Array.from(tabs).indexOf(btn);
+    pill.style.width     = slotW + 'px';
+    pill.style.transform = 'translateX(' + (padding + idx * slotW) + 'px)';
   }
 
-  // Stagger lần đầu: fade panels theo thứ tự 0/20/40/60ms
-  // Sau lần đầu: panels đứng yên, chỉ container fade
-  function staggerPanels(tabEl){
-    const panels = tabEl.querySelectorAll('.panel,.history-panel');
-    panels.forEach((p, i)=>{
-      p.style.opacity  = '0';
-      p.style.transform= 'translateY(4px)';
-      p.style.transition='none';
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          p.style.transition= 'opacity 200ms var(--ease-standard) '+(i*20)+'ms,'
-                            + 'transform 240ms var(--ease-premium) '+(i*20)+'ms';
-          p.style.opacity   = '';
-          p.style.transform = '';
-        });
-      });
+  const panelsWrap = document.querySelector('.tab-panels');
+
+  // Giữ height của wrapper = height tab đang active
+  // defer sang rAF để tránh forced synchronous layout
+  function syncHeight(tabEl){
+    requestAnimationFrame(()=>{
+      panelsWrap.style.height = tabEl.offsetHeight + 'px';
     });
-    // Cleanup inline styles sau khi stagger xong
-    setTimeout(()=>{
-      panels.forEach(p=>{
-        p.style.opacity=p.style.transform=p.style.transition='';
-      });
-    }, 400);
   }
 
   // Init pill không animate
@@ -1156,7 +1113,14 @@ function handleIsotopeChange(){
     movePill(active);
     requestAnimationFrame(()=>{ pill.style.transition = ''; });
   });
-  window.addEventListener('resize', ()=>movePill(active));
+
+  // Init height theo tab active ban đầu
+  syncHeight(document.getElementById(active.dataset.tab));
+
+  window.addEventListener('resize', ()=>{
+    movePill(active);
+    syncHeight(document.getElementById(active.dataset.tab));
+  });
 
   tabs.forEach(tab=>{
     tab.addEventListener('click',()=>{
@@ -1168,21 +1132,13 @@ function handleIsotopeChange(){
 
       const outEl = document.getElementById(active.dataset.tab);
       const inEl  = document.getElementById(tab.dataset.tab);
-      const isFirst = !visited.has(tab.dataset.tab);
 
-      // Outgoing: remove active → fade out (150ms)
+      // Fade out cũ trước, single rAF rồi mới fade in mới
+      // → không có empty frame, không overlap 2 panel cùng lúc
       outEl.classList.remove('active');
-
-      // Incoming: double rAF — chờ outgoing được paint trước
       requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          inEl.classList.add('active');
-          // Stagger chỉ khi lần đầu visit tab này
-          if(isFirst){
-            visited.add(tab.dataset.tab);
-            staggerPanels(inEl);
-          }
-        });
+        inEl.classList.add('active');
+        syncHeight(inEl);
       });
 
       active = tab;
