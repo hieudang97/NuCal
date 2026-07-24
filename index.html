@@ -461,6 +461,8 @@ select {
   appearance: none;
   -webkit-appearance: none;
   box-shadow: inset 0 1px 3px rgba(0,0,0,.28);
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 input:focus,
@@ -1297,6 +1299,24 @@ canvas.decay-chart {
   line-height: 1;
   padding: 0;
 }
+
+/* ── PWA Input Fix ─────────────────────────────────────────── */
+/* Đảm bảo input luôn có thể tương tác trong PWA */
+input,
+select,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  touch-action: manipulation !important;
+}
+
+/* Fix cho iOS Safari khi focus vào input */
+input:focus,
+select:focus,
+textarea:focus {
+  -webkit-touch-callout: none;
+}
 </style>
 </head>
 <body>
@@ -1722,7 +1742,7 @@ canvas.decay-chart {
    ═══════════════════════════════════════════════════════════════ */
 
 /** @type {Object.<string, {name:string, halfLife:number, color:string}>} */
-const ISOTOPES = Object.freeze({
+var ISOTOPES = Object.freeze({
   Tc99m: { name: 'Tc-99m', halfLife: 360.492, color: '#6cb6ff' },
   Ga68: { name: 'Ga-68', halfLife: 67.71, color: '#f472b6' },
   F18: { name: 'F-18', halfLife: 109.771, color: '#ffb84d' },
@@ -1731,7 +1751,7 @@ const ISOTOPES = Object.freeze({
 });
 
 /** @type {Object.<string, number>} */
-const UNIT_FACTORS = Object.freeze({
+var UNIT_FACTORS = Object.freeze({
   mCi: 1,
   MBq: 37,
   GBq: 0.037,
@@ -1739,59 +1759,52 @@ const UNIT_FACTORS = Object.freeze({
 });
 
 /** @type {Object.<string, string>} */
-const UNIT_LABELS = Object.freeze({
+var UNIT_LABELS = Object.freeze({
   mCi: 'mCi',
   MBq: 'MBq',
   GBq: 'GBq',
   uCi: 'µCi',
 });
 
-/** @type {Object.<string, string>} */
-const TIME_UNIT_LABELS = Object.freeze({
-  min: 'phút',
-  hr: 'giờ',
-  day: 'ngày',
-});
-
 /** @type {string} */
-const STORAGE_KEY = 'nm_v7';
+var STORAGE_KEY = 'nm_v7';
 
 /** @type {number} */
-const MAX_RECENT = 20;
+var MAX_RECENT = 20;
 
 /** @type {number} */
-const MAX_ACTIVITY_INT = 9;
+var MAX_ACTIVITY_INT = 9;
 
 /** @type {number} */
-const MAX_ACTIVITY_DEC = 4;
+var MAX_ACTIVITY_DEC = 4;
 
 /** @type {number} */
-const MAX_TIME_INT = 6;
+var MAX_TIME_INT = 6;
 
 /** @type {number} */
-const MAX_TIME_DEC = 4;
+var MAX_TIME_DEC = 4;
 
 /** @type {Object.<string, {l:string, t:number}[]>} */
-const PRESET_CACHE = {};
+var PRESET_CACHE = {};
 
 /* ═══════════════════════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════════════════════ */
 
 /** @type {Array} */
-let recentCalcs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+var recentCalcs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
 /** @type {{a0: number, at: number, t: number, t12: number}|null} */
-let halfLifeState = null;
+var halfLifeState = null;
 
 /** @type {number|null} */
-let resizeTimer = null;
+var resizeTimer = null;
 
 /* ═══════════════════════════════════════════════════════════════
    DOM REFERENCES
    ═══════════════════════════════════════════════════════════════ */
 
-const DOM = {
+var DOM = {
   isotope: document.getElementById('isotope'),
   hlDisplay: document.getElementById('hl_display'),
 
@@ -1937,7 +1950,7 @@ function decayActivity(a0, tMin) {
  * @returns {number} Minutes
  */
 function toMinutes(val, unit) {
-  const v = parseFloat(val);
+  var v = parseFloat(val);
   if (!isFinite(v) || v < 0) return 0;
   if (unit === 'hr') return v * 60;
   if (unit === 'day') return v * 1440;
@@ -1949,11 +1962,11 @@ function formatDuration(m) {
   if (!isFinite(m) || m < 0) return '—';
   m = Math.round(m);
   if (m < 60) return m + ' phút';
-  const h = Math.floor(m / 60);
-  const r = m % 60;
+  var h = Math.floor(m / 60);
+  var r = m % 60;
   if (h < 24) return r > 0 ? h + 'h ' + r + 'ph' : h + 'h';
-  const d = Math.floor(h / 24);
-  const hr = h % 24;
+  var d = Math.floor(h / 24);
+  var hr = h % 24;
   return hr > 0 ? d + 'n ' + hr + 'h' : d + ' ngày';
 }
 
@@ -1966,7 +1979,7 @@ function formatHalfLife(hl) {
 
 /** @returns {{date:string, time:string}} */
 function getTimestamp() {
-  const d = new Date();
+  var d = new Date();
   return {
     date: String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'),
     time: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'),
@@ -1977,7 +1990,7 @@ function getTimestamp() {
 function getPresets(hl) {
   if (PRESET_CACHE[hl]) return PRESET_CACHE[hl];
 
-  let presets;
+  var presets;
   if (hl <= 360) {
     presets = [
       { l: '15 phút', t: 15 },
@@ -2030,18 +2043,18 @@ function getPresets(hl) {
  * @param {Event} e
  */
 function sanitizeTimeInput(el, e) {
-  const isDeleting = e && (
+  var isDeleting = e && (
     e.inputType === 'deleteContentBackward' ||
     e.inputType === 'deleteContentForward' ||
     e.inputType === 'deleteByCut'
   );
 
-  let v = el.value;
-  const digits = v.replace(/\D/g, '').slice(0, 4);
+  var v = el.value;
+  var digits = v.replace(/\D/g, '').slice(0, 4);
 
   if (isDeleting) {
-    let cleaned = v.replace(/[^0-9:]/g, '');
-    const colonIdx = cleaned.indexOf(':');
+    var cleaned = v.replace(/[^0-9:]/g, '');
+    var colonIdx = cleaned.indexOf(':');
     if (colonIdx !== -1) {
       cleaned = cleaned.slice(0, colonIdx + 1) + cleaned.slice(colonIdx + 1).replace(/:/g, '');
     }
@@ -2050,7 +2063,7 @@ function sanitizeTimeInput(el, e) {
     return;
   }
 
-  const built = digits.length >= 3
+  var built = digits.length >= 3
     ? digits.slice(0, 2) + ':' + digits.slice(2)
     : digits;
   if (el.value !== built) el.value = built;
@@ -2061,15 +2074,15 @@ function sanitizeTimeInput(el, e) {
  * @param {Function} triggerFn
  */
 function handleTimeBlur(el, triggerFn) {
-  let raw = el.value.replace(/\D/g, '');
+  var raw = el.value.replace(/\D/g, '');
   if (!raw) {
     el.classList.remove('input-invalid');
     triggerFn();
     return;
   }
   raw = raw.slice(0, 4).padStart(4, '0');
-  const h = parseInt(raw.slice(0, 2), 10);
-  const m = parseInt(raw.slice(2, 4), 10);
+  var h = parseInt(raw.slice(0, 2), 10);
+  var m = parseInt(raw.slice(2, 4), 10);
   if (h > 23 || m > 59) {
     el.classList.add('input-invalid');
     triggerFn();
@@ -2083,24 +2096,24 @@ function handleTimeBlur(el, triggerFn) {
 /** @param {string} val @param {HTMLInputElement} el @returns {number|null} */
 function parseTime(val, el) {
   if (el && el.classList.contains('input-invalid')) return null;
-  let s = String(val || '').replace(/\D/g, '');
+  var s = String(val || '').replace(/\D/g, '');
   if (!s) return null;
   s = s.padStart(4, '0');
-  const h = parseInt(s.slice(0, 2), 10);
-  const m = parseInt(s.slice(2, 4), 10);
+  var h = parseInt(s.slice(0, 2), 10);
+  var m = parseInt(s.slice(2, 4), 10);
   if (h > 23 || m > 59) return null;
   return h * 60 + m;
 }
 
 /** @param {string} elId @returns {number|null} */
 function getTimeMins(elId) {
-  const el = document.getElementById(elId);
+  var el = document.getElementById(elId);
   return parseTime(el.value, el);
 }
 
 /** @param {number} start @param {number} end @returns {number} */
 function clockDelta(start, end) {
-  let d = end - start;
+  var d = end - start;
   if (d < 0) d += 1440;
   return d;
 }
@@ -2114,9 +2127,9 @@ function clockDelta(start, end) {
 function handleCommaKey(el, e) {
   if (e.key !== ',') return;
   e.preventDefault();
-  const start = el.selectionStart;
-  const end = el.selectionEnd;
-  const v = el.value;
+  var start = el.selectionStart;
+  var end = el.selectionEnd;
+  var v = el.value;
   if (v.indexOf('.') !== -1) return;
   el.value = v.slice(0, start) + '.' + v.slice(end);
   el.selectionStart = el.selectionEnd = start + 1;
@@ -2128,27 +2141,29 @@ function handleCommaKey(el, e) {
  * @param {number} maxInt
  * @param {number} maxDec
  */
-function sanitizeActivityInput(el, maxInt = MAX_ACTIVITY_INT, maxDec = MAX_ACTIVITY_DEC) {
-  let v = el.value;
-  const commaCount = (v.match(/,/g) || []).length;
+function sanitizeActivityInput(el, maxInt, maxDec) {
+  if (maxInt === undefined) maxInt = MAX_ACTIVITY_INT;
+  if (maxDec === undefined) maxDec = MAX_ACTIVITY_DEC;
+
+  var v = el.value;
+  var commaCount = (v.match(/,/g) || []).length;
 
   if (commaCount === 1) {
-    const afterComma = v.split(',')[1] || '';
+    var afterComma = v.split(',')[1] || '';
     v = afterComma.length !== 3 ? v.replace(',', '.') : v.replace(/,/g, '');
   } else {
     v = v.replace(/,/g, '');
   }
 
   v = v.replace(/[^0-9.]/g, '');
-  const parts = v.split('.');
+  var parts = v.split('.');
   if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
 
-  let [intPart, decPart] = v.split('.');
-  intPart = (intPart || '').slice(0, maxInt);
+  var intPart = (parts[0] || '').slice(0, maxInt);
   if (intPart && parseFloat(intPart) > 99999) intPart = '99999';
 
-  if (decPart !== undefined) {
-    decPart = decPart.slice(0, maxDec);
+  if (parts.length > 1) {
+    var decPart = parts[1].slice(0, maxDec);
     v = intPart + '.' + decPart;
   } else {
     v = intPart;
@@ -2167,12 +2182,12 @@ function normalizeTrailingDot(el) {
 
 /** @param {Object} data */
 function saveRecent(data) {
-  const { date, time } = getTimestamp();
+  var ts = getTimestamp();
   recentCalcs.unshift({
     ...data,
     isoKey: DOM.isotope.value,
-    tsDate: date,
-    tsTime: time,
+    tsDate: ts.date,
+    tsTime: ts.time,
   });
   recentCalcs = recentCalcs.slice(0, MAX_RECENT);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(recentCalcs));
@@ -2186,7 +2201,7 @@ function clearRecent() {
 }
 
 function renderRecent() {
-  const list = DOM.recentList;
+  var list = DOM.recentList;
   if (!recentCalcs.length) {
     list.innerHTML = '<div class="empty-state">Chưa có kết quả nào</div>';
     return;
@@ -2553,9 +2568,9 @@ function drawArc(pct) {
   cv.style.width = cv.style.height = '88px';
   var ctx = cv.getContext('2d');
   ctx.scale(dpr, dpr);
-  var cx = 44,
-    cy = 44,
-    r = 34;
+  var cx = 44;
+  var cy = 44;
+  var r = 34;
   var c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
 
   ctx.beginPath();
@@ -2614,7 +2629,7 @@ function calcHalflife() {
     DOM.hT12Min.textContent = '—';
     DOM.hInfo.classList.add('hidden');
     DOM.hQcMarker.style.display = 'none';
-    DOM.hQcBar?.classList.remove('active');
+    if (DOM.hQcBar) DOM.hQcBar.classList.remove('active');
     return;
   }
 
@@ -2658,7 +2673,7 @@ function calcHalflife() {
   var barPos = ((clampedPct + 5) / 10) * 100;
   marker.style.left = barPos + '%';
   marker.style.display = 'block';
-  DOM.hQcBar?.classList.add('active');
+  if (DOM.hQcBar) DOM.hQcBar.classList.add('active');
 
   halfLifeState = { a0: a0, at: at, t: t, t12: t12 };
 }
@@ -2701,35 +2716,22 @@ function initTabs() {
   var navItems = DOM.navItems;
   var contents = DOM.tabContents;
 
-  function setPanelAccessibility(panel, isActive) {
-    var interactive = panel.querySelectorAll('a, button, input, select, textarea, [tabindex]');
+  function setPanelActive(panel, isActive) {
     if (isActive) {
+      panel.classList.add('active');
       panel.removeAttribute('aria-hidden');
       panel.inert = false;
-      interactive.forEach(function(el) {
-        if (el.dataset.prevTabindex !== undefined) {
-          if (el.dataset.prevTabindex === '') {
-            el.removeAttribute('tabindex');
-          } else {
-            el.tabIndex = parseInt(el.dataset.prevTabindex, 10);
-          }
-          delete el.dataset.prevTabindex;
-        }
-      });
     } else {
+      panel.classList.remove('active');
       panel.setAttribute('aria-hidden', 'true');
       panel.inert = true;
-      interactive.forEach(function(el) {
-        if (el.dataset.prevTabindex === undefined) {
-          el.dataset.prevTabindex = el.getAttribute('tabindex') ?? '';
-        }
-        el.tabIndex = -1;
-      });
     }
   }
 
+  // Khởi tạo trạng thái ban đầu
   contents.forEach(function(panel) {
-    setPanelAccessibility(panel, panel.classList.contains('active'));
+    var isActive = panel.classList.contains('active');
+    setPanelActive(panel, isActive);
   });
 
   navItems.forEach(function(item) {
@@ -2738,18 +2740,17 @@ function initTabs() {
       var targetPanel = document.getElementById(tabId);
       if (!targetPanel) return;
 
+      // Cập nhật nav items
       navItems.forEach(function(n) {
         n.classList.remove('active');
       });
       this.classList.add('active');
 
+      // Cập nhật panels
       contents.forEach(function(p) {
-        p.classList.remove('active');
-        setPanelAccessibility(p, false);
+        var shouldBeActive = (p.id === tabId);
+        setPanelActive(p, shouldBeActive);
       });
-
-      targetPanel.classList.add('active');
-      setPanelAccessibility(targetPanel, true);
     });
   });
 }
@@ -2779,14 +2780,14 @@ function setupPWA() {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then(function() {
         deferredPrompt = null;
-        banner.classList.remove('show');
+        if (banner) banner.classList.remove('show');
       });
     });
   }
 
   if (dismissBtn) {
     dismissBtn.addEventListener('click', function() {
-      banner.classList.remove('show');
+      if (banner) banner.classList.remove('show');
       localStorage.setItem('pwa-dismissed', '1');
     });
   }
@@ -2869,6 +2870,7 @@ function init() {
   });
 }
 
+// Khởi chạy ứng dụng
 init();
 </script>
 </body>
