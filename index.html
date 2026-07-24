@@ -18,42 +18,46 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════
-   CSS — Constants & Design Tokens
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   CSS — DESIGN TOKENS & VARIABLES
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ── Variables ─────────────────────────────────── */
 :root {
-  /* Colors */
-  --bg: #0a0f14;
-  --border: rgba(255,255,255,.18);
-  --border-hi: rgba(255,255,255,.26);
-  --accent: #3ea6ff;
-  --green: #59d98e;
-  --orange: #ffb84d;
-  --red: #ff6b6b;
-  --text: #f4faff;
-  --muted: #c8ddef;
-  --muted2: #e4f2ff;
+  /* ── Colors ─────────────────────────────────────────── */
+  --color-bg: #0a0f14;
+  --color-border: rgba(255,255,255,.18);
+  --color-border-hi: rgba(255,255,255,.26);
+  --color-accent: #3ea6ff;
+  --color-green: #59d98e;
+  --color-orange: #ffb84d;
+  --color-red: #ff6b6b;
+  --color-text: #f4faff;
+  --color-muted: #c8ddef;
+  --color-muted2: #e4f2ff;
 
-  /* Typography */
+  /* ── Typography ──────────────────────────────────────── */
   --font-ui: 'Be Vietnam Pro', system-ui, sans-serif;
   --font-num: 'JetBrains Mono', monospace;
 
-  /* Spacing */
+  /* ── Spacing & Radius ────────────────────────────────── */
   --radius: 16px;
   --radius-lg: 22px;
   --radius-xl: 26px;
 
-  /* Motion */
+  /* ── Motion ──────────────────────────────────────────── */
   --motion-structural: 180ms;
   --motion-tactile: 140ms;
   --motion-press: 20ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* ── Reset ─────────────────────────────────────── */
-*, *::before, *::after {
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -66,9 +70,9 @@ html {
 
 body {
   font-family: var(--font-ui);
-  background: #0a0f14;
+  background: var(--color-bg);
   min-height: 100vh;
-  color: var(--text);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -80,9 +84,41 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(ellipse 140% 60% at 50% 0%, #152232 0%, #0a0f14 68%);
+  background: radial-gradient(ellipse 140% 60% at 50% 0%, #152232 0%, var(--color-bg) 68%);
   pointer-events: none;
 }
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.14);
+  border-radius: 3px;
+}
+
+/* ── Reduced Motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-structural: 120ms;
+    --motion-tactile: 80ms;
+    --motion-press: 10ms;
+  }
+  .btn:hover:not(:disabled),
+  .result-card:hover {
+    transform: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
 
 .app {
   max-width: 600px;
@@ -90,28 +126,7 @@ body::before {
   padding: env(safe-area-inset-top, 12px) 16px calc(40px + env(safe-area-inset-bottom, 0));
 }
 
-/* ── Scrollbar ─────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 3px; }
-
-/* ── Reduced Motion ───────────────────────────── */
-@media(prefers-reduced-motion: reduce) {
-  :root {
-    --motion-structural: 120ms;
-    --motion-tactile: 80ms;
-    --motion-press: 10ms;
-  }
-  .btn:hover:not(:disabled),
-  .result-card:hover { transform: none !important; }
-  html { scroll-behavior: auto; }
-}
-
-/* ═══════════════════════════════════════════════
-   LAYOUT COMPONENTS
-   ═══════════════════════════════════════════════ */
-
-/* ── Header ────────────────────────────────────── */
+/* ── Header ────────────────────────────────────────────────── */
 .app-header {
   text-align: center;
   padding: 32px 0 20px;
@@ -145,7 +160,7 @@ body::before {
   font-weight: 800;
   letter-spacing: -.5px;
   line-height: 1.2;
-  color: var(--text);
+  color: var(--color-text);
   white-space: nowrap;
   max-width: 82px;
   text-align: center;
@@ -170,35 +185,42 @@ body::before {
   font-weight: 600;
   letter-spacing: .2px;
   line-height: 1.4;
-  color: var(--text);
+  color: var(--color-text);
   opacity: .72;
 }
 
-@media(max-width:480px) {
-  .brand-subtitle { font-size: 14px; }
-  .brand-divider { height: 76px; }
+@media (max-width: 480px) {
+  .brand-subtitle {
+    font-size: 14px;
+  }
+  .brand-divider {
+    height: 76px;
+  }
 }
 
-/* ── Panel ─────────────────────────────────────── */
+/* ── Panel ─────────────────────────────────────────────────── */
 .panel {
   background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01)), rgba(20,28,40,.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-hi);
+  border: 1px solid var(--color-border-hi);
   border-radius: var(--radius-xl);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 6px 16px rgba(0,0,0,.36);
   padding: 18px;
   margin-bottom: 12px;
 }
 
-.panel-tight { padding: 14px 16px; margin-bottom: 12px; }
+.panel-tight {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
 
 .panel-title {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--muted2);
+  color: var(--color-muted2);
   margin-bottom: 14px;
   display: flex;
   justify-content: space-between;
@@ -209,12 +231,12 @@ body::before {
   font-family: var(--font-num);
   font-size: 11px;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--color-accent);
   letter-spacing: 0;
   text-transform: none;
 }
 
-/* ── Iso Bar ───────────────────────────────────── */
+/* ── Isotope Bar ──────────────────────────────────────────── */
 .iso-bar {
   display: flex;
   gap: 10px;
@@ -230,7 +252,7 @@ body::before {
   display: block;
   font-size: 11px;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--color-muted);
   margin-bottom: 6px;
   letter-spacing: .3px;
 }
@@ -249,7 +271,7 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .5px;
-  color: var(--accent);
+  color: var(--color-accent);
   margin-bottom: 3px;
 }
 
@@ -262,7 +284,7 @@ body::before {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Tabs (Floating Navigation Bar inside Isotope panel) ── */
+/* ── Navigation Tabs ──────────────────────────────────────── */
 .nav-bar {
   display: flex;
   align-items: center;
@@ -271,7 +293,7 @@ body::before {
   padding: 4px 6px;
   border-radius: 100px;
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   box-shadow: 0 4px 14px rgba(0,0,0,.4);
   transform: translateZ(0);
 }
@@ -283,7 +305,7 @@ body::before {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--muted);
+  color: var(--color-muted);
   padding: 10px 12px;
   border-radius: 100px;
   position: relative;
@@ -294,6 +316,8 @@ body::before {
   will-change: padding, background-color;
   flex: 1;
   min-width: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .nav-item svg {
@@ -301,19 +325,16 @@ body::before {
   height: 20px;
   flex-shrink: 0;
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
 }
 
-.nav-item .icon-active {
-  display: none;
-}
-
-.nav-item .icon-inactive {
+.nav-item .icon {
   display: block;
   opacity: 0.6;
   transition: opacity 0.3s ease;
 }
 
-.nav-item:not(.active):hover .icon-inactive {
+.nav-item:not(.active):hover .icon {
   opacity: 1;
   transform: scale(1.05);
 }
@@ -330,6 +351,7 @@ body::before {
               opacity 0.25s cubic-bezier(0.25, 1, 0.5, 1),
               margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: max-width, opacity, margin-left;
+  pointer-events: none;
 }
 
 .nav-item.active {
@@ -338,13 +360,8 @@ body::before {
   color: #fff;
 }
 
-.nav-item.active .icon-inactive {
+.nav-item.active .icon {
   opacity: 1;
-  display: block;
-}
-
-.nav-item.active .icon-active {
-  display: none;
 }
 
 .nav-item.active .label {
@@ -353,14 +370,23 @@ body::before {
   margin-left: 6px;
 }
 
-@media(max-width:480px) {
-  .nav-item { padding: 8px 8px; }
-  .nav-item.active { padding: 8px 12px; }
-  .nav-item .label { font-size: 11px; }
-  .nav-item svg { width: 18px; height: 18px; }
+@media (max-width: 480px) {
+  .nav-item {
+    padding: 8px 8px;
+  }
+  .nav-item.active {
+    padding: 8px 12px;
+  }
+  .nav-item .label {
+    font-size: 11px;
+  }
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
-/* ── Tab Panels ────────────────────────────────── */
+/* ── Tab Panels ───────────────────────────────────────────── */
 .tab-panels {
   display: grid;
   position: relative;
@@ -379,7 +405,7 @@ body::before {
   transition: opacity var(--motion-structural) var(--ease-standard);
 }
 
-/* ── Grids ─────────────────────────────────────── */
+/* ── Grids ─────────────────────────────────────────────────── */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -394,10 +420,14 @@ body::before {
   margin-bottom: 12px;
 }
 
-.grid-rv { grid-template-columns: .75fr 1.5fr !important; }
-.grid-hl { grid-template-columns: 1fr 1fr !important; }
+.grid-rv {
+  grid-template-columns: .75fr 1.5fr !important;
+}
+.grid-hl {
+  grid-template-columns: 1fr 1fr !important;
+}
 
-/* ── Fields ────────────────────────────────────── */
+/* ── Fields ────────────────────────────────────────────────── */
 .field {
   display: flex;
   flex-direction: column;
@@ -407,17 +437,18 @@ body::before {
 .field label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--color-muted);
   display: block;
   text-align: center;
 }
 
-/* ── Inputs ────────────────────────────────────── */
-input, select {
+/* ── Inputs ────────────────────────────────────────────────── */
+input,
+select {
   width: 100%;
   height: 50px;
   background: rgba(255,255,255,.07);
-  border: 1px solid var(--border-hi);
+  border: 1px solid var(--color-border-hi);
   border-radius: var(--radius);
   color: #fff;
   font-family: var(--font-num);
@@ -432,7 +463,8 @@ input, select {
   box-shadow: inset 0 1px 3px rgba(0,0,0,.28);
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   border-color: rgba(62,166,255,.6);
   box-shadow: 0 0 0 4px rgba(62,166,255,.12), inset 0 1px 3px rgba(0,0,0,.28);
 }
@@ -448,7 +480,9 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type=number] { -moz-appearance: textfield; }
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 
 select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b8cfe0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -458,7 +492,7 @@ select {
   font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 700;
-  color: var(--muted2);
+  color: var(--color-muted2);
 }
 
 .input-invalid {
@@ -466,7 +500,7 @@ select {
   background: rgba(255,107,107,.06) !important;
 }
 
-/* ── Time Input ────────────────────────────────── */
+/* ── Time Input ───────────────────────────────────────────── */
 .time-wrap {
   position: relative;
   display: flex;
@@ -500,16 +534,18 @@ select {
   transition: border-color .15s, background .15s;
 }
 
-.time-field:focus { background: rgba(62,166,255,.10); }
+.time-field:focus {
+  background: rgba(62,166,255,.10);
+}
 
-/* ── Divider ────────────────────────────────────── */
+/* ── Divider ───────────────────────────────────────────────── */
 .panel-divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-border);
   margin: 16px 0;
 }
 
-/* ── Result Grid ───────────────────────────────── */
+/* ── Result Grid ──────────────────────────────────────────── */
 .result-grid {
   display: grid;
   grid-template-columns: 1fr 1.3fr 1fr;
@@ -519,7 +555,7 @@ select {
 
 .result-card {
   background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 13px 8px;
   text-align: center;
@@ -545,14 +581,14 @@ select {
   font-weight: 700;
   letter-spacing: .8px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-muted);
   margin-bottom: 6px;
 }
 
 .result-value {
   font-family: var(--font-num);
   font-weight: 700;
-  color: var(--muted2);
+  color: var(--color-muted2);
   margin-top: 3px;
   overflow: hidden;
   white-space: nowrap;
@@ -577,7 +613,7 @@ select {
 }
 
 .result-value.minus {
-  color: var(--red);
+  color: var(--color-red);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -586,7 +622,7 @@ select {
 }
 
 .result-value.plus {
-  color: var(--orange);
+  color: var(--color-orange);
   font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
@@ -597,13 +633,16 @@ select {
 .result-unit {
   font-size: 11px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--color-muted);
   opacity: .78;
   margin-top: 4px;
 }
 
-/* ── Info Rows ─────────────────────────────────── */
-.info-rows { padding-top: 12px; }
+/* ── Info Rows ─────────────────────────────────────────────── */
+.info-rows {
+  padding-top: 12px;
+}
+
 .info-row {
   display: flex;
   justify-content: space-between;
@@ -612,10 +651,13 @@ select {
   border-bottom: 1px solid rgba(255,255,255,.05);
   font-size: 13px;
 }
-.info-row:last-child { border-bottom: none; }
+
+.info-row:last-child {
+  border-bottom: none;
+}
 
 .ik {
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 12px;
 }
 
@@ -623,14 +665,21 @@ select {
   font-family: var(--font-num);
   font-size: 13px;
   font-weight: 600;
-  color: var(--muted2);
+  color: var(--color-muted2);
   font-variant-numeric: tabular-nums;
 }
-.iv.green { color: var(--green); }
-.iv.orange { color: var(--orange); }
-.iv.red { color: var(--red); }
 
-/* ── Formula Box ───────────────────────────────── */
+.iv.green {
+  color: var(--color-green);
+}
+.iv.orange {
+  color: var(--color-orange);
+}
+.iv.red {
+  color: var(--color-red);
+}
+
+/* ── Formula Box ───────────────────────────────────────────── */
 .formula-box {
   margin-top: 14px;
   margin-bottom: 0;
@@ -639,7 +688,7 @@ select {
 
 .formula-box summary {
   cursor: pointer;
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 12px;
   font-weight: 600;
   list-style: none;
@@ -650,25 +699,36 @@ select {
   user-select: none;
 }
 
-.formula-box summary::-webkit-details-marker { display: none; }
-details[open] > .formula { display: block; }
+.formula-box summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] > .formula {
+  display: block;
+}
 
 .formula {
   margin-top: 10px;
   padding: 10px 14px;
   background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   font-family: var(--font-num);
   font-size: 13px;
-  color: var(--muted2);
+  color: var(--color-muted2);
   text-align: center;
 }
 
-/* ── Quick Table ───────────────────────────────── */
-.quick-table { padding: 16px; }
+/* ── Quick Table ───────────────────────────────────────────── */
+.quick-table {
+  padding: 16px;
+}
 
-.qt-a0-header-wrap { text-align: center; margin-bottom: 12px; }
+.qt-a0-header-wrap {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 .qt-a0-header {
   display: inline-block;
   padding: 6px 20px;
@@ -677,7 +737,7 @@ details[open] > .formula { display: block; }
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--muted2);
+  color: var(--color-muted2);
 }
 
 .qt-head {
@@ -688,7 +748,7 @@ details[open] > .formula { display: block; }
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .3px;
-  color: var(--muted);
+  color: var(--color-muted);
   text-align: center;
 }
 
@@ -706,10 +766,26 @@ details[open] > .formula { display: block; }
   margin-bottom: 6px;
 }
 
-.qt-row:last-child { margin-bottom: 0; }
-.qt-time { color: var(--muted2); font-weight: 600; }
-.qt-val { font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
-.qt-pct { font-family: var(--font-num); font-size: 12px; font-variant-numeric: tabular-nums; }
+.qt-row:last-child {
+  margin-bottom: 0;
+}
+
+.qt-time {
+  color: var(--color-muted2);
+  font-weight: 600;
+}
+
+.qt-val {
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.qt-pct {
+  font-family: var(--font-num);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
 
 .bar-wrap {
   height: 5px;
@@ -725,8 +801,12 @@ details[open] > .formula { display: block; }
   transition: opacity var(--motion-structural) var(--ease-standard);
 }
 
-/* ── Chart ─────────────────────────────────────── */
-.chart-panel { padding: 14px 16px 16px; overflow: hidden; }
+/* ── Chart ──────────────────────────────────────────────────── */
+.chart-panel {
+  padding: 14px 16px 16px;
+  overflow: hidden;
+}
+
 canvas.decay-chart {
   display: block;
   width: 100%;
@@ -734,10 +814,10 @@ canvas.decay-chart {
   border-radius: 8px;
 }
 
-/* ── History ───────────────────────────────────── */
+/* ── History ────────────────────────────────────────────────── */
 .history-panel {
   background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)), rgba(20,28,40,.88);
-  border: 1px solid var(--border-hi);
+  border: 1px solid var(--color-border-hi);
   border-radius: var(--radius-xl);
   margin-top: 12px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 24px rgba(0,0,0,.36);
@@ -751,7 +831,7 @@ canvas.decay-chart {
   justify-content: space-between;
   background: none;
   border: none;
-  color: var(--muted2);
+  color: var(--color-muted2);
   cursor: pointer;
   font-family: var(--font-ui);
   font-size: 13px;
@@ -770,7 +850,7 @@ canvas.decay-chart {
 
 .history-chevron {
   font-size: 20px;
-  color: var(--accent);
+  color: var(--color-accent);
   font-weight: 700;
   line-height: 1;
   display: inline-block;
@@ -808,7 +888,7 @@ canvas.decay-chart {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .3px;
-  color: var(--muted);
+  color: var(--color-muted);
   text-align: center;
   border-bottom: 1px solid rgba(255,255,255,.07);
   margin-bottom: 8px;
@@ -820,13 +900,15 @@ canvas.decay-chart {
   gap: 8px;
   align-items: center;
   background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px 10px;
   margin-bottom: 7px;
 }
 
-.recent-row:last-child { margin-bottom: 0; }
+.recent-row:last-child {
+  margin-bottom: 0;
+}
 
 .iso-badge {
   display: flex;
@@ -841,13 +923,16 @@ canvas.decay-chart {
   font-family: var(--font-num);
   font-size: 10px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--color-accent);
   line-height: 1.25;
   text-align: center;
   word-break: break-word;
 }
 
-.rr-body { min-width: 0; }
+.rr-body {
+  min-width: 0;
+}
+
 .rr-ts {
   text-align: right;
   display: flex;
@@ -855,68 +940,91 @@ canvas.decay-chart {
   align-items: flex-end;
   justify-content: center;
 }
-.ri-body { flex: 1; min-width: 0; }
+
+.ri-body {
+  flex: 1;
+  min-width: 0;
+}
+
 .ri-main {
   font-family: var(--font-num);
   font-size: 12px;
   font-weight: 700;
   color: #fff;
 }
+
 .ri-sub {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
   margin-top: 2px;
 }
+
 .ri-ts {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
   white-space: nowrap;
   text-align: right;
   line-height: 1.4;
   flex-shrink: 0;
 }
+
 .ri-ts-date {
-  color: var(--muted2);
+  color: var(--color-muted2);
   font-weight: 700;
   display: block;
   font-size: 10px;
 }
+
 .ri-ts-time {
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 10px;
   display: block;
 }
 
-/* ── RT Boxes ──────────────────────────────────── */
-.rt-results-panel { transition: opacity var(--motion-structural) var(--ease-standard); }
+/* ── RT Boxes ───────────────────────────────────────────────── */
+.rt-results-panel {
+  transition: opacity var(--motion-structural) var(--ease-standard);
+}
+
 .rt-layout {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
   align-items: center;
 }
-.rt-boxes { display: flex; flex-direction: column; gap: 7px; }
+
+.rt-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
 .rt-box {
   background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: 10px 13px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .rt-box-label {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--color-muted);
   font-weight: 500;
 }
+
 .rt-box-value {
   font-family: var(--font-num);
   font-size: 17px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.result-at { color: var(--green); }
+
+.result-at {
+  color: var(--color-green);
+}
 
 .arc-wrap {
   display: flex;
@@ -924,21 +1032,31 @@ canvas.decay-chart {
   align-items: center;
   gap: 5px;
 }
+
 .arc-label {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: .5px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--color-muted);
 }
 
-@media(max-width:480px) {
-  .rt-layout { grid-template-columns: 1fr; }
-  .arc-wrap { display: none; }
+@media (max-width: 480px) {
+  .rt-layout {
+    grid-template-columns: 1fr;
+  }
+  .arc-wrap {
+    display: none;
+  }
 }
 
-/* ── QC Range Bar ──────────────────────────────── */
-.qc-bar-wrap { margin: 22px 0 2px; position: relative; height: 5px; }
+/* ── QC Range Bar ──────────────────────────────────────────── */
+.qc-bar-wrap {
+  margin: 22px 0 2px;
+  position: relative;
+  height: 5px;
+}
+
 .qc-bar {
   height: 5px;
   border-radius: 3px;
@@ -953,7 +1071,10 @@ canvas.decay-chart {
     rgba(220,65,65,1) 100%
   );
 }
-.qc-bar.active { opacity: .9; }
+
+.qc-bar.active {
+  opacity: .9;
+}
 
 .qc-marker {
   position: absolute;
@@ -979,7 +1100,7 @@ canvas.decay-chart {
   line-height: 1;
 }
 
-/* ── Buttons ───────────────────────────────────── */
+/* ── Buttons ────────────────────────────────────────────────── */
 .btn {
   width: 100%;
   min-height: 48px;
@@ -1025,15 +1146,26 @@ canvas.decay-chart {
 .btn-sm:hover:not(:disabled) {
   background: rgba(255,107,107,.12);
   border-color: rgba(255,107,107,.3);
-  color: var(--red);
+  color: var(--color-red);
   box-shadow: none;
   transform: none;
 }
 
-/* ── Eval badges ───────────────────────────────── */
-.eval-ok { color: var(--green); font-weight: 700; }
-.eval-warn { color: var(--orange); font-weight: 700; }
-.eval-bad { color: var(--red); font-weight: 700; }
+/* ── Eval badges ───────────────────────────────────────────── */
+.eval-ok {
+  color: var(--color-green);
+  font-weight: 700;
+}
+
+.eval-warn {
+  color: var(--color-orange);
+  font-weight: 700;
+}
+
+.eval-bad {
+  color: var(--color-red);
+  font-weight: 700;
+}
 
 .empty-state {
   color: rgba(228,242,255,.55);
@@ -1042,17 +1174,44 @@ canvas.decay-chart {
   padding: 20px 16px;
 }
 
-/* ── Utilities ─────────────────────────────────── */
-.hidden { display: none !important; }
-.flex-end { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.text-muted-xs { font-size: 10px; color: var(--muted); }
-.mb-0 { margin-bottom: 0 !important; }
-.mb-10 { margin-bottom: 10px; }
-.val-lg { font-size: 28px !important; }
-.val-md { font-size: 22px !important; color: #fff !important; }
-.val-rv { font-size: 16px !important; }
+/* ── Utilities ─────────────────────────────────────────────── */
+.hidden {
+  display: none !important;
+}
 
-/* ── PWA Install Banner ────────────────────────── */
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.text-muted-xs {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.val-lg {
+  font-size: 28px !important;
+}
+
+.val-md {
+  font-size: 22px !important;
+  color: #fff !important;
+}
+
+.val-rv {
+  font-size: 16px !important;
+}
+
+/* ── PWA Install Banner ────────────────────────────────────── */
 .pwa-banner {
   position: fixed;
   bottom: 0;
@@ -1063,22 +1222,24 @@ canvas.decay-chart {
   border: 1px solid rgba(62,166,255,.32);
   border-bottom: none;
   border-radius: 18px 18px 0 0;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom,0));
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0));
   display: flex;
   align-items: center;
   gap: 12px;
   box-shadow: 0 -4px 16px rgba(0,0,0,.4);
-  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
   z-index: 9999;
 }
 
-.pwa-banner.show { transform: translateX(-50%) translateY(0); }
+.pwa-banner.show {
+  transform: translateX(-50%) translateY(0);
+}
 
 .pwa-banner-icon {
   font-size: 28px;
   flex-shrink: 0;
   line-height: 1;
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .pwa-banner-text {
@@ -1097,7 +1258,7 @@ canvas.decay-chart {
 
 .pwa-banner-text span {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--color-muted);
 }
 
 .pwa-btn-install {
@@ -1116,7 +1277,9 @@ canvas.decay-chart {
   white-space: nowrap;
 }
 
-.pwa-btn-install:hover { background: rgba(62,166,255,.38); }
+.pwa-btn-install:hover {
+  background: rgba(62,166,255,.38);
+}
 
 .pwa-btn-dismiss {
   flex-shrink: 0;
@@ -1125,7 +1288,7 @@ canvas.decay-chart {
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 8px;
-  color: var(--muted);
+  color: var(--color-muted);
   font-size: 12px;
   cursor: pointer;
   display: flex;
@@ -1139,7 +1302,7 @@ canvas.decay-chart {
 <body>
 <div class="app">
 
-<!-- ── Header ─────────────────────────────────────── -->
+<!-- ── Header ───────────────────────────────────────────────── -->
 <header class="app-header">
   <div class="header-brand">
     <div class="brand-logo">
@@ -1152,9 +1315,8 @@ canvas.decay-chart {
   </div>
 </header>
 
-<!-- ── Iso bar + Tabs (gộp chung) ────────────────── -->
+<!-- ── Isotope Bar + Tabs ──────────────────────────────────── -->
 <div class="panel panel-tight">
-  <!-- Iso bar -->
   <div class="iso-bar">
     <div class="iso-select">
       <label>Đồng vị phóng xạ</label>
@@ -1172,28 +1334,22 @@ canvas.decay-chart {
     </div>
   </div>
 
-  <!-- Tabs (nằm trong cùng khối panel) -->
   <nav class="nav-bar" id="tabBar">
-    <!-- Tab 1: Phân rã -->
-    <button class="nav-item active" data-tab="decay">
-      <svg class="icon-inactive" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-item active" data-tab="decay" type="button">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 17h6v-6"/>
         <path d="m22 17-8.5-8.5-5 5L2 7"/>
       </svg>
       <span class="label">Phân rã</span>
     </button>
-
-    <!-- Tab 2: Hoạt độ -->
-    <button class="nav-item" data-tab="activity">
-      <svg class="icon-inactive" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-item" data-tab="activity" type="button">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>
       </svg>
       <span class="label">Hoạt độ</span>
     </button>
-
-    <!-- Tab 3: Công cụ -->
-    <button class="nav-item" data-tab="tools">
-      <svg class="icon-inactive" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-item" data-tab="tools" type="button">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
         <circle cx="12" cy="12" r="4"/>
       </svg>
@@ -1204,14 +1360,20 @@ canvas.decay-chart {
 
 <div class="tab-panels">
 
-<!-- ═══════════ TAB 1 — PHÂN RÃ ════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     TAB 1 — PHÂN RÃ (DECAY)
+     ═══════════════════════════════════════════════════════════ -->
 <section class="tab-content active" id="decay">
   <div class="panel">
     <div class="panel-title">Tính hoạt độ phân rã <span id="iso-label-decay">Tc-99m</span></div>
+
     <div class="grid-2">
       <div class="field">
         <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="d_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.decay()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="d_a0" placeholder="1000" maxlength="14"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this); handlers.decay()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Đơn vị</label>
@@ -1223,10 +1385,14 @@ canvas.decay-chart {
         </select>
       </div>
     </div>
+
     <div class="grid-2">
       <div class="field">
         <label>Thời gian (t)</label>
-        <input type="text" inputmode="decimal" id="d_time" placeholder="0" maxlength="11" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this,6,4);handlers.decay()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="d_time" placeholder="0" maxlength="11"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this, 6, 4); handlers.decay()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Đơn vị</label>
@@ -1239,6 +1405,7 @@ canvas.decay-chart {
     </div>
 
     <hr class="panel-divider">
+
     <div class="result-grid">
       <div class="result-card">
         <div class="result-label">−5%</div>
@@ -1272,7 +1439,7 @@ canvas.decay-chart {
     </details>
   </div>
 
-  <!-- Quick table -->
+  <!-- Quick Table -->
   <div class="panel quick-table">
     <div class="panel-title">Bảng phân rã nhanh <span id="qt_iso_label">Tc-99m</span></div>
     <div class="qt-a0-header-wrap">
@@ -1299,7 +1466,7 @@ canvas.decay-chart {
     <div class="history-content" id="historyContent">
       <div class="history-content-inner">
         <div class="flex-end">
-          <button class="btn btn-sm" onclick="if(confirm('Xóa toàn bộ lịch sử?'))handlers.clearRecent()">Xóa tất cả</button>
+          <button class="btn btn-sm" onclick="if(confirm('Xóa toàn bộ lịch sử?')) handlers.clearRecent()">Xóa tất cả</button>
         </div>
         <div id="recentList"><div class="empty-state">Chưa có kết quả nào</div></div>
       </div>
@@ -1307,15 +1474,22 @@ canvas.decay-chart {
   </div>
 </section>
 
-<!-- ═══════════ TAB 2 — HOẠT ĐỘ ════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     TAB 2 — HOẠT ĐỘ (ACTIVITY)
+     ═══════════════════════════════════════════════════════════ -->
 <section class="tab-content" id="activity">
+
   <!-- Realtime -->
   <div class="panel">
     <div class="panel-title">Hoạt độ theo thời gian thực <span id="iso-label-rt">Tc-99m</span></div>
+
     <div class="grid-2">
       <div class="field">
         <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="rt_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.realtime()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="rt_a0" placeholder="1000" maxlength="14"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this); handlers.realtime()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Đơn vị</label>
@@ -1327,6 +1501,7 @@ canvas.decay-chart {
         </select>
       </div>
     </div>
+
     <div class="grid-2">
       <div class="field">
         <label>Thời điểm thực hiện</label>
@@ -1334,7 +1509,8 @@ canvas.decay-chart {
           <input type="text" inputmode="numeric" id="rt_start" placeholder="08:00" maxlength="5"
                  class="time-field"
                  onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.realtime)">
+                 oninput="handlers.sanitizeTime(this, event)"
+                 onblur="handlers.timeBlur(this, handlers.realtime)">
         </div>
       </div>
       <div class="field">
@@ -1343,12 +1519,14 @@ canvas.decay-chart {
           <input type="text" inputmode="numeric" id="rt_end" placeholder="11:00" maxlength="5"
                  class="time-field"
                  onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.realtime)">
+                 oninput="handlers.sanitizeTime(this, event)"
+                 onblur="handlers.timeBlur(this, handlers.realtime)">
         </div>
       </div>
     </div>
 
     <hr class="panel-divider">
+
     <div id="rt_results" style="opacity:.3" class="rt-results-panel">
       <div class="rt-layout">
         <div class="rt-boxes">
@@ -1371,6 +1549,7 @@ canvas.decay-chart {
         </div>
       </div>
     </div>
+
     <button id="rt_save_btn" class="btn" disabled onclick="handlers.saveRealtime()">Lưu kết quả</button>
 
     <details class="formula-box">
@@ -1382,10 +1561,14 @@ canvas.decay-chart {
   <!-- Reverse -->
   <div class="panel">
     <div class="panel-title">Tính hoạt độ cần chuẩn bị</div>
+
     <div class="grid-2">
       <div class="field">
         <label>Hoạt độ A(t)</label>
-        <input type="text" inputmode="decimal" id="rv_target" placeholder="20" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.reverse()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="rv_target" placeholder="20" maxlength="14"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this); handlers.reverse()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Đơn vị</label>
@@ -1397,6 +1580,7 @@ canvas.decay-chart {
         </select>
       </div>
     </div>
+
     <div class="grid-2">
       <div class="field">
         <label>Thời điểm thực hiện</label>
@@ -1404,7 +1588,8 @@ canvas.decay-chart {
           <input type="text" inputmode="numeric" id="rv_start" placeholder="07:30" maxlength="5"
                  class="time-field"
                  onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.reverse)">
+                 oninput="handlers.sanitizeTime(this, event)"
+                 onblur="handlers.timeBlur(this, handlers.reverse)">
         </div>
       </div>
       <div class="field">
@@ -1413,12 +1598,14 @@ canvas.decay-chart {
           <input type="text" inputmode="numeric" id="rv_end" placeholder="10:00" maxlength="5"
                  class="time-field"
                  onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.reverse)">
+                 oninput="handlers.sanitizeTime(this, event)"
+                 onblur="handlers.timeBlur(this, handlers.reverse)">
         </div>
       </div>
     </div>
 
     <hr class="panel-divider">
+
     <div class="result-grid grid-rv mb-0">
       <div class="result-card">
         <div class="result-label">Δt</div>
@@ -1437,24 +1624,37 @@ canvas.decay-chart {
   </div>
 </section>
 
-<!-- ═══════════ TAB 3 — CÔNG CỤ ════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     TAB 3 — CÔNG CỤ (TOOLS)
+     ═══════════════════════════════════════════════════════════ -->
 <section class="tab-content" id="tools">
   <div class="panel">
     <div class="panel-title">Kiểm tra chu kỳ bán rã <span id="iso-label-hl">Tc-99m</span></div>
+
     <div class="grid-2 mb-10">
       <div class="field">
         <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="h_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.halflife()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="h_a0" placeholder="1000" maxlength="14"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this); handlers.halflife()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Hoạt độ A(t)</label>
-        <input type="text" inputmode="decimal" id="h_at" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.halflife()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="h_at" placeholder="1000" maxlength="14"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this); handlers.halflife()"
+               onblur="handlers.normalizeDot(this)">
       </div>
     </div>
+
     <div class="grid-2">
       <div class="field">
         <label>Thời gian</label>
-        <input type="text" inputmode="decimal" id="h_t" placeholder="30" maxlength="11" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this,6,4);handlers.halflife()" onblur="handlers.normalizeDot(this)">
+        <input type="text" inputmode="decimal" id="h_t" placeholder="30" maxlength="11"
+               onkeydown="handlers.commaKey(this, event)"
+               oninput="handlers.sanitizeActivity(this, 6, 4); handlers.halflife()"
+               onblur="handlers.normalizeDot(this)">
       </div>
       <div class="field">
         <label>Đơn vị</label>
@@ -1471,6 +1671,7 @@ canvas.decay-chart {
       <div class="qc-marker" id="h_qc_marker"></div>
     </div>
     <div class="qc-label-row"><span>−5%</span><span>−2%</span><span>0</span><span>+2%</span><span>+5%</span></div>
+
     <div class="result-grid grid-hl mb-0">
       <div class="result-card main">
         <div class="result-label">T½ đo được</div>
@@ -1523,23 +1724,52 @@ canvas.decay-chart {
 /** @type {Object.<string, {name:string, halfLife:number, color:string}>} */
 const ISOTOPES = Object.freeze({
   Tc99m: { name: 'Tc-99m', halfLife: 360.492, color: '#6cb6ff' },
-  Ga68:  { name: 'Ga-68',  halfLife: 67.71,   color: '#f472b6' },
-  F18:   { name: 'F-18',   halfLife: 109.771, color: '#ffb84d' },
-  I131:  { name: 'I-131',  halfLife: 11549.808, color: '#59d98e' },
-  Lu177: { name: 'Lu-177', halfLife: 9572.40,  color: '#c084fc' },
+  Ga68: { name: 'Ga-68', halfLife: 67.71, color: '#f472b6' },
+  F18: { name: 'F-18', halfLife: 109.771, color: '#ffb84d' },
+  I131: { name: 'I-131', halfLife: 11549.808, color: '#59d98e' },
+  Lu177: { name: 'Lu-177', halfLife: 9572.40, color: '#c084fc' },
 });
 
 /** @type {Object.<string, number>} */
-const UNIT_FACTORS = Object.freeze({ mCi: 1, MBq: 37, GBq: 0.037, uCi: 1000 });
+const UNIT_FACTORS = Object.freeze({
+  mCi: 1,
+  MBq: 37,
+  GBq: 0.037,
+  uCi: 1000,
+});
 
 /** @type {Object.<string, string>} */
-const UNIT_LABELS = Object.freeze({ mCi: 'mCi', MBq: 'MBq', GBq: 'GBq', uCi: 'µCi' });
+const UNIT_LABELS = Object.freeze({
+  mCi: 'mCi',
+  MBq: 'MBq',
+  GBq: 'GBq',
+  uCi: 'µCi',
+});
+
+/** @type {Object.<string, string>} */
+const TIME_UNIT_LABELS = Object.freeze({
+  min: 'phút',
+  hr: 'giờ',
+  day: 'ngày',
+});
 
 /** @type {string} */
 const STORAGE_KEY = 'nm_v7';
 
 /** @type {number} */
 const MAX_RECENT = 20;
+
+/** @type {number} */
+const MAX_ACTIVITY_INT = 9;
+
+/** @type {number} */
+const MAX_ACTIVITY_DEC = 4;
+
+/** @type {number} */
+const MAX_TIME_INT = 6;
+
+/** @type {number} */
+const MAX_TIME_DEC = 4;
 
 /** @type {Object.<string, {l:string, t:number}[]>} */
 const PRESET_CACHE = {};
@@ -1635,8 +1865,7 @@ const DOM = {
   pwaInstallBtn: document.getElementById('pwa-install-btn'),
   pwaDismissBtn: document.getElementById('pwa-dismiss-btn'),
 
-  // Tabs (new nav)
-  tabBar: document.getElementById('tabBar'),
+  // Navigation
   navItems: document.querySelectorAll('.nav-item'),
   tabContents: document.querySelectorAll('.tab-content'),
 };
@@ -1646,23 +1875,33 @@ const DOM = {
    ═══════════════════════════════════════════════════════════════ */
 
 /** @returns {typeof ISOTOPES[keyof typeof ISOTOPES]} */
-function getIsotope() { return ISOTOPES[DOM.isotope.value]; }
+function getIsotope() {
+  return ISOTOPES[DOM.isotope.value];
+}
 
 /** @returns {number} Half-life in minutes */
-function getHalfLife() { return getIsotope().halfLife; }
+function getHalfLife() {
+  return getIsotope().halfLife;
+}
 
 /** @param {string} unit @returns {number} */
-function getUnitFactor(unit) { return UNIT_FACTORS[unit] || 1; }
+function getUnitFactor(unit) {
+  return UNIT_FACTORS[unit] || 1;
+}
 
 /** @param {string} unit @returns {string} */
-function getUnitLabel(unit) { return UNIT_LABELS[unit] || unit; }
+function getUnitLabel(unit) {
+  return UNIT_LABELS[unit] || unit;
+}
 
 /**
- * @param {number} raw Value in mCi (raw)
+ * @param {number} raw Value in mCi
  * @param {string} unit Display unit
  * @returns {number} Value in display unit
  */
-function toDisplay(raw, unit) { return raw * getUnitFactor(unit); }
+function toDisplay(raw, unit) {
+  return raw * getUnitFactor(unit);
+}
 
 /**
  * @param {number} raw Value in mCi
@@ -1688,7 +1927,7 @@ function fmt(v) {
  * @param {number} tMin Time in minutes
  * @returns {number} Decayed activity in mCi
  */
-function decay(a0, tMin) {
+function decayActivity(a0, tMin) {
   return a0 * Math.exp(-Math.LN2 * tMin / getHalfLife());
 }
 
@@ -1710,9 +1949,11 @@ function formatDuration(m) {
   if (!isFinite(m) || m < 0) return '—';
   m = Math.round(m);
   if (m < 60) return m + ' phút';
-  const h = Math.floor(m / 60), r = m % 60;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
   if (h < 24) return r > 0 ? h + 'h ' + r + 'ph' : h + 'h';
-  const d = Math.floor(h / 24), hr = h % 24;
+  const d = Math.floor(h / 24);
+  const hr = h % 24;
   return hr > 0 ? d + 'n ' + hr + 'h' : d + ' ngày';
 }
 
@@ -1735,37 +1976,54 @@ function getTimestamp() {
 /** @param {number} hl Half-life @returns {{l:string, t:number}[]} */
 function getPresets(hl) {
   if (PRESET_CACHE[hl]) return PRESET_CACHE[hl];
+
   let presets;
   if (hl <= 360) {
     presets = [
-      { l: '15 phút', t: 15 }, { l: '30 phút', t: 30 },
-      { l: '1 giờ', t: 60 }, { l: '2 giờ', t: 120 },
-      { l: '3 giờ', t: 180 }, { l: '4 giờ', t: 240 },
-      { l: '6 giờ', t: 360 }, { l: '12 giờ', t: 720 },
-      { l: '18 giờ', t: 1080 }, { l: '24 giờ', t: 1440 },
+      { l: '15 phút', t: 15 },
+      { l: '30 phút', t: 30 },
+      { l: '1 giờ', t: 60 },
+      { l: '2 giờ', t: 120 },
+      { l: '3 giờ', t: 180 },
+      { l: '4 giờ', t: 240 },
+      { l: '6 giờ', t: 360 },
+      { l: '12 giờ', t: 720 },
+      { l: '18 giờ', t: 1080 },
+      { l: '24 giờ', t: 1440 },
     ];
   } else if (hl <= 2880) {
     presets = [
-      { l: '1 giờ', t: 60 }, { l: '2 giờ', t: 120 },
-      { l: '4 giờ', t: 240 }, { l: '6 giờ', t: 360 },
-      { l: '12 giờ', t: 720 }, { l: '24 giờ', t: 1440 },
-      { l: '2 ngày', t: 2880 }, { l: '3 ngày', t: 4320 },
-      { l: '5 ngày', t: 7200 }, { l: '7 ngày', t: 10080 },
+      { l: '1 giờ', t: 60 },
+      { l: '2 giờ', t: 120 },
+      { l: '4 giờ', t: 240 },
+      { l: '6 giờ', t: 360 },
+      { l: '12 giờ', t: 720 },
+      { l: '24 giờ', t: 1440 },
+      { l: '2 ngày', t: 2880 },
+      { l: '3 ngày', t: 4320 },
+      { l: '5 ngày', t: 7200 },
+      { l: '7 ngày', t: 10080 },
     ];
   } else {
     presets = [
-      { l: '1 ngày', t: 1440 }, { l: '2 ngày', t: 2880 },
-      { l: '3 ngày', t: 4320 }, { l: '5 ngày', t: 7200 },
-      { l: '7 ngày', t: 10080 }, { l: '10 ngày', t: 14400 },
-      { l: '14 ngày', t: 20160 }, { l: '21 ngày', t: 30240 },
-      { l: '28 ngày', t: 40320 }, { l: '42 ngày', t: 60480 },
+      { l: '1 ngày', t: 1440 },
+      { l: '2 ngày', t: 2880 },
+      { l: '3 ngày', t: 4320 },
+      { l: '5 ngày', t: 7200 },
+      { l: '7 ngày', t: 10080 },
+      { l: '10 ngày', t: 14400 },
+      { l: '14 ngày', t: 20160 },
+      { l: '21 ngày', t: 30240 },
+      { l: '28 ngày', t: 40320 },
+      { l: '42 ngày', t: 60480 },
     ];
   }
+
   PRESET_CACHE[hl] = presets;
   return presets;
 }
 
-/* ── Time Input Helpers ─────────────────────────── */
+/* ── Time Input Helpers ────────────────────────────────────── */
 
 /**
  * @param {HTMLInputElement} el
@@ -1847,7 +2105,7 @@ function clockDelta(start, end) {
   return d;
 }
 
-/* ── Input Sanitization ─────────────────────────── */
+/* ── Input Sanitization ────────────────────────────────────── */
 
 /**
  * @param {HTMLInputElement} el
@@ -1856,7 +2114,8 @@ function clockDelta(start, end) {
 function handleCommaKey(el, e) {
   if (e.key !== ',') return;
   e.preventDefault();
-  const start = el.selectionStart, end = el.selectionEnd;
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
   const v = el.value;
   if (v.indexOf('.') !== -1) return;
   el.value = v.slice(0, start) + '.' + v.slice(end);
@@ -1869,27 +2128,32 @@ function handleCommaKey(el, e) {
  * @param {number} maxInt
  * @param {number} maxDec
  */
-function sanitizeActivityInput(el, maxInt = 9, maxDec = 4) {
+function sanitizeActivityInput(el, maxInt = MAX_ACTIVITY_INT, maxDec = MAX_ACTIVITY_DEC) {
   let v = el.value;
   const commaCount = (v.match(/,/g) || []).length;
+
   if (commaCount === 1) {
     const afterComma = v.split(',')[1] || '';
     v = afterComma.length !== 3 ? v.replace(',', '.') : v.replace(/,/g, '');
   } else {
     v = v.replace(/,/g, '');
   }
+
   v = v.replace(/[^0-9.]/g, '');
   const parts = v.split('.');
   if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+
   let [intPart, decPart] = v.split('.');
   intPart = (intPart || '').slice(0, maxInt);
   if (intPart && parseFloat(intPart) > 99999) intPart = '99999';
+
   if (decPart !== undefined) {
     decPart = decPart.slice(0, maxDec);
     v = intPart + '.' + decPart;
   } else {
     v = intPart;
   }
+
   if (v.startsWith('.')) v = '0' + v;
   el.value = v;
 }
@@ -1899,7 +2163,7 @@ function normalizeTrailingDot(el) {
   if (el.value.endsWith('.')) el.value = el.value.slice(0, -1);
 }
 
-/* ── Recent / History ───────────────────────────── */
+/* ── Storage / History ────────────────────────────────────── */
 
 /** @param {Object} data */
 function saveRecent(data) {
@@ -1927,17 +2191,18 @@ function renderRecent() {
     list.innerHTML = '<div class="empty-state">Chưa có kết quả nào</div>';
     return;
   }
-  list.innerHTML = recentCalcs.map(e => {
-    const iso = ISOTOPES[e.isoKey];
-    const isoName = iso?.name || e.isoKey || '';
-    const color = iso?.color || '#6cb6ff';
-    const uLb = getUnitLabel(e.unit || 'mCi');
-    const mainLine = e.t12
+
+  list.innerHTML = recentCalcs.map(function(e) {
+    var iso = ISOTOPES[e.isoKey];
+    var isoName = iso?.name || e.isoKey || '';
+    var color = iso?.color || '#6cb6ff';
+    var uLb = getUnitLabel(e.unit || 'mCi');
+    var mainLine = e.t12
       ? 'T½: ' + fmt(e.t12) + ' ph'
       : 'A(t): ' + formatDisplay(e.at, e.unit);
-    const subLine = 'A₀: ' + fmt(toDisplay(e.a0, e.unit)) + ' ' + uLb + ' | Δt: ' + formatDuration(e.delta);
-    const dateStr = e.tsDate || '';
-    const timeStr = e.tsTime || e.ts || '';
+    var subLine = 'A₀: ' + fmt(toDisplay(e.a0, e.unit)) + ' ' + uLb + ' | Δt: ' + formatDuration(e.delta);
+    var dateStr = e.tsDate || '';
+    var timeStr = e.tsTime || e.ts || '';
     return '<div class="recent-row">' +
       '<div class="iso-badge" style="color:' + color + ';background:' + color + '1a;border-color:' + color + '48">' + isoName + '</div>' +
       '<div class="rr-body"><div class="ri-main">' + mainLine + '</div><div class="ri-sub">' + subLine + '</div></div>' +
@@ -1947,10 +2212,10 @@ function renderRecent() {
 }
 
 function toggleHistory() {
-  const panel = DOM.historyPanel;
-  const content = DOM.historyContent;
-  const ch = DOM.histChev;
-  const isOpen = panel.classList.contains('open');
+  var panel = DOM.historyPanel;
+  var content = DOM.historyContent;
+  var ch = DOM.histChev;
+  var isOpen = panel.classList.contains('open');
 
   if (isOpen) {
     content.style.maxHeight = content.scrollHeight + 'px';
@@ -1965,8 +2230,8 @@ function toggleHistory() {
     content.removeAttribute('aria-hidden');
     content.inert = false;
     if (ch) ch.textContent = '−';
-    requestAnimationFrame(() => {
-      const target = Math.min(content.scrollHeight, 420);
+    requestAnimationFrame(function() {
+      var target = Math.min(content.scrollHeight, 420);
       content.style.maxHeight = target + 'px';
     });
   }
@@ -1976,24 +2241,26 @@ function toggleHistory() {
    BUSINESS LOGIC
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Tab 1: Decay ───────────────────────────────── */
+/* ── Tab 1: Decay ──────────────────────────────────────────── */
 
 function calcDecay() {
-  const a0 = parseFloat(DOM.dA0.value);
-  const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-  const uKey = DOM.dUnit.value;
-  const uLb = getUnitLabel(uKey);
+  var a0 = parseFloat(DOM.dA0.value);
+  var t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+  var uKey = DOM.dUnit.value;
+  var uLb = getUnitLabel(uKey);
 
   if (!isFinite(a0) || a0 <= 0) {
-    ['at_main', 'at_minus', 'at_plus'].forEach(id => document.getElementById(id).textContent = '—');
+    ['at_main', 'at_minus', 'at_plus'].forEach(function(id) {
+      document.getElementById(id).textContent = '—';
+    });
     DOM.dInfoPanel.classList.add('hidden');
     clearChart();
     buildQuickTable(0, uKey);
     return;
   }
 
-  const at = decay(a0, t);
-  const pct = (at / a0) * 100;
+  var at = decayActivity(a0, t);
+  var pct = (at / a0) * 100;
 
   DOM.atMain.textContent = fmt(toDisplay(at, uKey));
   DOM.atMinus.textContent = fmt(toDisplay(at * 0.95, uKey));
@@ -2008,21 +2275,21 @@ function calcDecay() {
   DOM.dDecayed.textContent = formatDisplay(a0 - at, uKey);
 
   buildQuickTable(a0, uKey);
-  drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
+  drawDecayChart({ a0: a0, tCurrent: t, unitKey: uKey });
 }
 
 function saveDecayResult() {
-  const a0 = parseFloat(DOM.dA0.value);
+  var a0 = parseFloat(DOM.dA0.value);
   if (!isFinite(a0) || a0 <= 0) return;
-  const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-  const uKey = DOM.dUnit.value;
-  saveRecent({ type: 'Decay', a0, delta: t, at: decay(a0, t), unit: uKey });
+  var t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+  var uKey = DOM.dUnit.value;
+  saveRecent({ type: 'Decay', a0: a0, delta: t, at: decayActivity(a0, t), unit: uKey });
 }
 
 function buildQuickTable(a0, uKey) {
-  const rows = DOM.qtRows;
-  const hdrEl = DOM.qtA0Header;
-  const iso = getIsotope();
+  var rows = DOM.qtRows;
+  var hdrEl = DOM.qtA0Header;
+  var iso = getIsotope();
 
   if (!isFinite(a0) || a0 <= 0) {
     rows.innerHTML = '<div class="empty-state">Nhập A₀ để xem bảng phân rã</div>';
@@ -2030,18 +2297,18 @@ function buildQuickTable(a0, uKey) {
     return;
   }
 
-  const uLb = getUnitLabel(uKey);
+  var uLb = getUnitLabel(uKey);
   hdrEl.classList.remove('hidden');
   hdrEl.innerHTML = 'A₀ = <span style="color:#fff;font-weight:700">' +
     fmt(toDisplay(a0, uKey)) + ' ' + uLb + '</span>';
 
-  const presets = getPresets(iso.halfLife);
-  rows.innerHTML = presets.map(({ l, t }) => {
-    const at = decay(a0, t);
-    const pct = (at / a0) * 100;
-    const c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
+  var presets = getPresets(iso.halfLife);
+  rows.innerHTML = presets.map(function(item) {
+    var at = decayActivity(a0, item.t);
+    var pct = (at / a0) * 100;
+    var c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
     return '<div class="qt-row">' +
-      '<div class="qt-time">' + l + '</div>' +
+      '<div class="qt-time">' + item.l + '</div>' +
       '<div class="qt-val" style="color:' + c + '">' + fmt(toDisplay(at, uKey)) + '</div>' +
       '<div class="qt-pct" style="color:' + c + '">' + pct.toFixed(1) + '%</div>' +
       '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%;background:' + c + '"></div></div>' +
@@ -2049,19 +2316,19 @@ function buildQuickTable(a0, uKey) {
   }).join('');
 }
 
-/* ── Chart ──────────────────────────────────────── */
+/* ── Chart ──────────────────────────────────────────────────── */
 
 function clearChart() {
-  const cv = DOM.decayChart;
+  var cv = DOM.decayChart;
   if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.parentElement.clientWidth || 300;
-  const h = 150;
+  var dpr = window.devicePixelRatio || 1;
+  var w = cv.parentElement.clientWidth || 300;
+  var h = 150;
   cv.width = w * dpr;
   cv.height = h * dpr;
   cv.style.width = w + 'px';
   cv.style.height = h + 'px';
-  const ctx = cv.getContext('2d');
+  var ctx = cv.getContext('2d');
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = 'rgba(228,242,255,.55)';
@@ -2073,37 +2340,37 @@ function clearChart() {
 /**
  * @param {{a0:number, tCurrent:number, unitKey:string}} params
  */
-function drawDecayChart({ a0, tCurrent, unitKey }) {
-  const cv = DOM.decayChart;
+function drawDecayChart(params) {
+  var cv = DOM.decayChart;
   if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.parentElement.clientWidth || 300;
-  const h = 150;
+  var dpr = window.devicePixelRatio || 1;
+  var w = cv.parentElement.clientWidth || 300;
+  var h = 150;
   cv.width = w * dpr;
   cv.height = h * dpr;
   cv.style.width = w + 'px';
   cv.style.height = h + 'px';
-  const ctx = cv.getContext('2d');
+  var ctx = cv.getContext('2d');
   ctx.scale(dpr, dpr);
 
-  const hl = getHalfLife();
-  const iso = getIsotope();
-  const color = iso.color;
-  const uF = getUnitFactor(unitKey);
-  const uLb = getUnitLabel(unitKey);
-  const a0disp = a0 * uF;
-  const maxT = Math.max(hl * 4, tCurrent * 1.3, 480);
-  const pad = { l: 58, r: 14, t: 14, b: 24 };
-  const cw = w - pad.l - pad.r;
-  const ch = h - pad.t - pad.b;
-  const xS = cw / maxT;
-  const yS = ch / a0disp;
+  var hl = getHalfLife();
+  var iso = getIsotope();
+  var color = iso.color;
+  var uF = getUnitFactor(params.unitKey);
+  var uLb = getUnitLabel(params.unitKey);
+  var a0disp = params.a0 * uF;
+  var maxT = Math.max(hl * 4, params.tCurrent * 1.3, 480);
+  var pad = { l: 58, r: 14, t: 14, b: 24 };
+  var cw = w - pad.l - pad.r;
+  var ch = h - pad.t - pad.b;
+  var xS = cw / maxT;
+  var yS = ch / a0disp;
 
   ctx.clearRect(0, 0, w, h);
 
   // Y-axis gridlines
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + ch * i / 4;
+  for (var i = 0; i <= 4; i++) {
+    var y = pad.t + ch * i / 4;
     ctx.beginPath();
     ctx.moveTo(pad.l, y);
     ctx.lineTo(w - pad.r, y);
@@ -2117,8 +2384,8 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
   }
 
   // Half-life vertical guides
-  for (let n = 1; n * hl <= maxT; n++) {
-    const x = pad.l + n * hl * xS;
+  for (var n = 1; n * hl <= maxT; n++) {
+    var x = pad.l + n * hl * xS;
     ctx.setLineDash([2, 5]);
     ctx.beginPath();
     ctx.moveTo(x, pad.t);
@@ -2130,16 +2397,16 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
   }
 
   // Fill area
-  const grad = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
+  var grad = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
   grad.addColorStop(0, color + '2a');
   grad.addColorStop(1, 'transparent');
   ctx.beginPath();
-  let first = true;
-  for (let i = 0; i <= 300; i++) {
-    const t = (i / 300) * maxT;
-    const x = pad.l + t * xS;
-    const y = h - pad.b - decay(a0, t) * uF * yS;
-    first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  var first = true;
+  for (var j = 0; j <= 300; j++) {
+    var t = (j / 300) * maxT;
+    var px = pad.l + t * xS;
+    var py = h - pad.b - decayActivity(params.a0, t) * uF * yS;
+    first ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
     first = false;
   }
   ctx.lineTo(pad.l + maxT * xS, h - pad.b);
@@ -2149,16 +2416,16 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
   ctx.fill();
 
   // Curve
-  const lg = ctx.createLinearGradient(pad.l, 0, w - pad.r, 0);
+  var lg = ctx.createLinearGradient(pad.l, 0, w - pad.r, 0);
   lg.addColorStop(0, color);
   lg.addColorStop(1, color + '99');
   ctx.beginPath();
   first = true;
-  for (let i = 0; i <= 300; i++) {
-    const t = (i / 300) * maxT;
-    const x = pad.l + t * xS;
-    const y = h - pad.b - decay(a0, t) * uF * yS;
-    first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  for (var k = 0; k <= 300; k++) {
+    var t2 = (k / 300) * maxT;
+    var px2 = pad.l + t2 * xS;
+    var py2 = h - pad.b - decayActivity(params.a0, t2) * uF * yS;
+    first ? ctx.moveTo(px2, py2) : ctx.lineTo(px2, py2);
     first = false;
   }
   ctx.strokeStyle = lg;
@@ -2166,11 +2433,11 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
   ctx.stroke();
 
   // Current point marker
-  if (tCurrent >= 0 && tCurrent <= maxT) {
-    const at = decay(a0, tCurrent);
-    const atDisp = at * uF;
-    const cx = pad.l + tCurrent * xS;
-    const cy = h - pad.b - atDisp * yS;
+  if (params.tCurrent >= 0 && params.tCurrent <= maxT) {
+    var at = decayActivity(params.a0, params.tCurrent);
+    var atDisp = at * uF;
+    var cx = pad.l + params.tCurrent * xS;
+    var cy = h - pad.b - atDisp * yS;
 
     ctx.setLineDash([3, 4]);
     ctx.beginPath();
@@ -2189,22 +2456,22 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    const lbl = fmt(atDisp) + ' ' + uLb;
+    var lbl = fmt(atDisp) + ' ' + uLb;
     ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'left';
-    const tw = ctx.measureText(lbl).width;
-    const lblH = 13;
-    const lblPad = 4;
-    let tx = cx + 9;
-    let ty = cy - 10;
+    var tw = ctx.measureText(lbl).width;
+    var lblH = 13;
+    var lblPad = 4;
+    var tx = cx + 9;
+    var ty = cy - 10;
     if (tx + tw + lblPad > w - pad.r) tx = cx - tw - 9;
     if (ty - lblH < pad.t) ty = cy + 20;
 
     ctx.fillStyle = 'rgba(8,14,22,.92)';
-    const rx = tx - lblPad;
-    const ry = ty - lblH + 2;
-    const rw = tw + lblPad * 2;
-    const rh = lblH + 2;
+    var rx = tx - lblPad;
+    var ry = ty - lblH + 2;
+    var rw = tw + lblPad * 2;
+    var rh = lblH + 2;
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, 4);
     else ctx.fillRect(rx, ry, rw, rh);
@@ -2217,25 +2484,25 @@ function drawDecayChart({ a0, tCurrent, unitKey }) {
   }
 
   // X-axis time labels
-  const step = maxT <= 480 ? 60 : maxT <= 2880 ? 360 : maxT <= 10080 ? 1440 : 2880;
+  var step = maxT <= 480 ? 60 : maxT <= 2880 ? 360 : maxT <= 10080 ? 1440 : 2880;
   ctx.fillStyle = 'rgba(184,207,224,.55)';
   ctx.font = '9px monospace';
   ctx.textAlign = 'center';
-  for (let t = 0; t <= maxT; t += step) {
-    const lbl = t < 60 ? t + 'm' : t < 1440 ? (t / 60) + 'h' : Math.round(t / 1440) + 'd';
-    ctx.fillText(lbl, pad.l + t * xS, h - 5);
+  for (var t3 = 0; t3 <= maxT; t3 += step) {
+    var lbl2 = t3 < 60 ? t3 + 'm' : t3 < 1440 ? (t3 / 60) + 'h' : Math.round(t3 / 1440) + 'd';
+    ctx.fillText(lbl2, pad.l + t3 * xS, h - 5);
   }
 }
 
-/* ── Tab 2: Realtime ────────────────────────────── */
+/* ── Tab 2: Realtime ───────────────────────────────────────── */
 
 function calcRealtime() {
-  const a0 = parseFloat(DOM.rtA0.value);
-  const uKey = DOM.rtUnit.value;
-  const sm = getTimeMins('rt_start');
-  const em = getTimeMins('rt_end');
-  const pan = DOM.rtResults;
-  const btn = DOM.rtSaveBtn;
+  var a0 = parseFloat(DOM.rtA0.value);
+  var uKey = DOM.rtUnit.value;
+  var sm = getTimeMins('rt_start');
+  var em = getTimeMins('rt_end');
+  var pan = DOM.rtResults;
+  var btn = DOM.rtSaveBtn;
 
   if (!isFinite(a0) || a0 <= 0 || sm === null || em === null) {
     pan.style.opacity = '.3';
@@ -2243,19 +2510,19 @@ function calcRealtime() {
     return;
   }
 
-  const delta = clockDelta(sm, em);
-  const at = decay(a0, delta);
-  const pct = (at / a0) * 100;
-  const uLb = getUnitLabel(uKey);
+  var delta = clockDelta(sm, em);
+  var at = decayActivity(a0, delta);
+  var pct = (at / a0) * 100;
+  var uLb = getUnitLabel(uKey);
 
   pan.style.opacity = '1';
   DOM.rtDelta.textContent = formatDuration(delta);
   DOM.rtResult.textContent = fmt(toDisplay(at, uKey));
   DOM.rtUnitLbl.textContent = uLb;
 
-  const pctEl = DOM.rtPct;
+  var pctEl = DOM.rtPct;
   pctEl.textContent = pct.toFixed(2) + '%';
-  pctEl.style.color = pct > 60 ? 'var(--green)' : pct > 30 ? 'var(--orange)' : 'var(--red)';
+  pctEl.style.color = pct > 60 ? 'var(--color-green)' : pct > 30 ? 'var(--color-orange)' : 'var(--color-red)';
 
   drawArc(pct);
 
@@ -2267,7 +2534,7 @@ function calcRealtime() {
 }
 
 function saveRealtimeResult() {
-  const btn = DOM.rtSaveBtn;
+  var btn = DOM.rtSaveBtn;
   saveRecent({
     type: 'Realtime',
     a0: +btn.dataset.a0,
@@ -2279,15 +2546,17 @@ function saveRealtimeResult() {
 
 /** @param {number} pct */
 function drawArc(pct) {
-  const cv = DOM.rtArc;
+  var cv = DOM.rtArc;
   if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
+  var dpr = window.devicePixelRatio || 1;
   cv.width = cv.height = 88 * dpr;
   cv.style.width = cv.style.height = '88px';
-  const ctx = cv.getContext('2d');
+  var ctx = cv.getContext('2d');
   ctx.scale(dpr, dpr);
-  const cx = 44, cy = 44, r = 34;
-  const c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
+  var cx = 44,
+    cy = 44,
+    r = 34;
+  var c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
 
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -2308,13 +2577,13 @@ function drawArc(pct) {
   ctx.fillText(pct.toFixed(0) + '%', cx, cy + 5);
 }
 
-/* ── Tab 2: Reverse ────────────────────────────── */
+/* ── Tab 2: Reverse ────────────────────────────────────────── */
 
 function calcReverse() {
-  const target = parseFloat(DOM.rvTarget.value);
-  const uKey = DOM.rvUnit.value;
-  const pm = getTimeMins('rv_start');
-  const um = getTimeMins('rv_end');
+  var target = parseFloat(DOM.rvTarget.value);
+  var uKey = DOM.rvUnit.value;
+  var pm = getTimeMins('rv_start');
+  var um = getTimeMins('rv_end');
 
   if (!isFinite(target) || target <= 0 || pm === null || um === null) {
     DOM.rvResult.textContent = '—';
@@ -2322,22 +2591,22 @@ function calcReverse() {
     return;
   }
 
-  const delta = clockDelta(pm, um);
-  const targetRaw = target / getUnitFactor(uKey);
-  const needed = targetRaw * Math.exp(Math.LN2 * delta / getHalfLife());
+  var delta = clockDelta(pm, um);
+  var targetRaw = target / getUnitFactor(uKey);
+  var needed = targetRaw * Math.exp(Math.LN2 * delta / getHalfLife());
 
   DOM.rvResult.textContent = formatDisplay(needed, uKey);
   DOM.rvDelta.textContent = formatDuration(delta);
 }
 
-/* ── Tab 3: Half-life ───────────────────────────── */
+/* ── Tab 3: Half-life ──────────────────────────────────────── */
 
 function calcHalflife() {
-  const a0 = parseFloat(DOM.hA0.value);
-  const at = parseFloat(DOM.hAt.value);
-  const tRaw = parseFloat(DOM.hT.value);
-  const tUnit = DOM.hTUnit?.value || 'min';
-  const t = toMinutes(tRaw, tUnit);
+  var a0 = parseFloat(DOM.hA0.value);
+  var at = parseFloat(DOM.hAt.value);
+  var tRaw = parseFloat(DOM.hT.value);
+  var tUnit = DOM.hTUnit?.value || 'min';
+  var t = toMinutes(tRaw, tUnit);
 
   if (!isFinite(t) || !isFinite(a0) || !isFinite(at) || at >= a0 || a0 <= 0 || at <= 0 || t <= 0) {
     DOM.hT12Smart.textContent = '—';
@@ -2349,17 +2618,24 @@ function calcHalflife() {
     return;
   }
 
-  const t12 = (Math.LN2 * t) / Math.log(a0 / at);
-  const theory = getHalfLife();
-  const diff = t12 - theory;
-  const diffPct = (diff / theory) * 100;
-  const absD = Math.abs(diffPct);
+  var t12 = (Math.LN2 * t) / Math.log(a0 / at);
+  var theory = getHalfLife();
+  var diff = t12 - theory;
+  var diffPct = (diff / theory) * 100;
+  var absD = Math.abs(diffPct);
 
   // Smart unit
-  let smartVal, smartUnit;
-  if (t12 < 180) { smartVal = fmt(t12); smartUnit = 'phút'; }
-  else if (t12 < 2880) { smartVal = (t12 / 60).toFixed(3); smartUnit = 'giờ'; }
-  else { smartVal = (t12 / 1440).toFixed(3); smartUnit = 'ngày'; }
+  var smartVal, smartUnit;
+  if (t12 < 180) {
+    smartVal = fmt(t12);
+    smartUnit = 'phút';
+  } else if (t12 < 2880) {
+    smartVal = (t12 / 60).toFixed(3);
+    smartUnit = 'giờ';
+  } else {
+    smartVal = (t12 / 1440).toFixed(3);
+    smartUnit = 'ngày';
+  }
 
   DOM.hT12Smart.textContent = smartVal;
   DOM.hT12SmartUnit.textContent = smartUnit;
@@ -2370,26 +2646,26 @@ function calcHalflife() {
   DOM.hActual.textContent = fmt(t12) + ' phút';
   DOM.hDiff.textContent = (diff > 0 ? '+' : '') + diff.toFixed(2) + ' ph (' + diffPct.toFixed(1) + '%)';
 
-  let evalHTML;
+  var evalHTML;
   if (absD < 2) evalHTML = '<span class="eval-ok">Đạt — Sai lệch &lt;2%</span>';
   else if (absD < 5) evalHTML = '<span class="eval-warn">Cần xem lại — Sai lệch 2–5%</span>';
   else evalHTML = '<span class="eval-bad">Không đạt — Sai lệch &gt;5%</span>';
   DOM.hEval.innerHTML = evalHTML;
 
   // QC range marker
-  const marker = DOM.hQcMarker;
-  const clampedPct = Math.max(-5, Math.min(5, diffPct));
-  const barPos = ((clampedPct + 5) / 10) * 100;
+  var marker = DOM.hQcMarker;
+  var clampedPct = Math.max(-5, Math.min(5, diffPct));
+  var barPos = ((clampedPct + 5) / 10) * 100;
   marker.style.left = barPos + '%';
   marker.style.display = 'block';
   DOM.hQcBar?.classList.add('active');
 
-  halfLifeState = { a0, at, t, t12 };
+  halfLifeState = { a0: a0, at: at, t: t, t12: t12 };
 }
 
 function saveHalflifeResult() {
   if (!halfLifeState) return;
-  const currentUnit = DOM.dUnit.value;
+  var currentUnit = DOM.dUnit.value;
   saveRecent({
     type: 'Half-life',
     a0: halfLifeState.a0,
@@ -2400,15 +2676,15 @@ function saveHalflifeResult() {
   });
 }
 
-/* ── Isotope Change ─────────────────────────────── */
+/* ── Isotope Change ────────────────────────────────────────── */
 
 function onIsotopeChange() {
-  const iso = getIsotope();
+  var iso = getIsotope();
   DOM.hlDisplay.textContent = formatHalfLife(iso.halfLife);
 
-  const ids = ['iso-label-decay', 'iso-label-rt', 'iso-label-hl', 'qt_iso_label'];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
+  var ids = ['iso-label-decay', 'iso-label-rt', 'iso-label-hl', 'qt_iso_label'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
     if (el) el.textContent = iso.name;
   });
 
@@ -2418,20 +2694,19 @@ function onIsotopeChange() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TAB INITIALIZATION (New Floating Navigation Bar)
+   TAB INITIALIZATION
    ═══════════════════════════════════════════════════════════════ */
 
 function initTabs() {
-  const navItems = DOM.navItems;
-  const contents = DOM.tabContents;
-  let active = document.querySelector('.nav-item.active');
+  var navItems = DOM.navItems;
+  var contents = DOM.tabContents;
 
   function setPanelAccessibility(panel, isActive) {
-    const interactive = panel.querySelectorAll('a, button, input, select, textarea, [tabindex]');
+    var interactive = panel.querySelectorAll('a, button, input, select, textarea, [tabindex]');
     if (isActive) {
       panel.removeAttribute('aria-hidden');
       panel.inert = false;
-      interactive.forEach(el => {
+      interactive.forEach(function(el) {
         if (el.dataset.prevTabindex !== undefined) {
           if (el.dataset.prevTabindex === '') {
             el.removeAttribute('tabindex');
@@ -2444,7 +2719,7 @@ function initTabs() {
     } else {
       panel.setAttribute('aria-hidden', 'true');
       panel.inert = true;
-      interactive.forEach(el => {
+      interactive.forEach(function(el) {
         if (el.dataset.prevTabindex === undefined) {
           el.dataset.prevTabindex = el.getAttribute('tabindex') ?? '';
         }
@@ -2453,22 +2728,22 @@ function initTabs() {
     }
   }
 
-  contents.forEach(panel => {
+  contents.forEach(function(panel) {
     setPanelAccessibility(panel, panel.classList.contains('active'));
   });
 
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.dataset.tab;
-      const targetPanel = document.getElementById(tabId);
+  navItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      var tabId = this.dataset.tab;
+      var targetPanel = document.getElementById(tabId);
       if (!targetPanel) return;
 
-      // Update nav items
-      navItems.forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
+      navItems.forEach(function(n) {
+        n.classList.remove('active');
+      });
+      this.classList.add('active');
 
-      // Update panels
-      contents.forEach(p => {
+      contents.forEach(function(p) {
         p.classList.remove('active');
         setPanelAccessibility(p, false);
       });
@@ -2483,14 +2758,14 @@ function initTabs() {
    PWA SETUP
    ═══════════════════════════════════════════════════════════════ */
 
-let deferredPrompt = null;
+var deferredPrompt = null;
 
 function setupPWA() {
-  const banner = DOM.pwaBanner;
-  const installBtn = DOM.pwaInstallBtn;
-  const dismissBtn = DOM.pwaDismissBtn;
+  var banner = DOM.pwaBanner;
+  var installBtn = DOM.pwaInstallBtn;
+  var dismissBtn = DOM.pwaDismissBtn;
 
-  window.addEventListener('beforeinstallprompt', e => {
+  window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
     if (banner && !localStorage.getItem('pwa-dismissed')) {
@@ -2499,23 +2774,24 @@ function setupPWA() {
   });
 
   if (installBtn) {
-    installBtn.addEventListener('click', async () => {
+    installBtn.addEventListener('click', function() {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      banner.classList.remove('show');
+      deferredPrompt.userChoice.then(function() {
+        deferredPrompt = null;
+        banner.classList.remove('show');
+      });
     });
   }
 
   if (dismissBtn) {
-    dismissBtn.addEventListener('click', () => {
+    dismissBtn.addEventListener('click', function() {
       banner.classList.remove('show');
       localStorage.setItem('pwa-dismissed', '1');
     });
   }
 
-  window.addEventListener('appinstalled', () => {
+  window.addEventListener('appinstalled', function() {
     if (banner) banner.classList.remove('show');
   });
 }
@@ -2526,9 +2802,11 @@ function setupPWA() {
 
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+    window.addEventListener('load', function() {
       navigator.serviceWorker.register('./sw.js')
-        .catch(err => console.warn('[NuCal PWA] SW failed:', err));
+        .catch(function(err) {
+          console.warn('[NuCal PWA] SW failed:', err);
+        });
     });
   }
 }
@@ -2538,30 +2816,19 @@ function registerServiceWorker() {
    ═══════════════════════════════════════════════════════════════ */
 
 window.handlers = {
-  // Isotope
   isotopeChange: onIsotopeChange,
-
-  // Input utilities
   commaKey: handleCommaKey,
   sanitizeActivity: sanitizeActivityInput,
   normalizeDot: normalizeTrailingDot,
   sanitizeTime: sanitizeTimeInput,
   timeBlur: handleTimeBlur,
-
-  // Tab 1
   decay: calcDecay,
   saveDecay: saveDecayResult,
-
-  // Tab 2
   realtime: calcRealtime,
   saveRealtime: saveRealtimeResult,
   reverse: calcReverse,
-
-  // Tab 3
   halflife: calcHalflife,
   saveHalflife: saveHalflifeResult,
-
-  // History
   toggleHistory: toggleHistory,
   clearRecent: clearRecent,
 };
@@ -2571,42 +2838,30 @@ window.handlers = {
    ═══════════════════════════════════════════════════════════════ */
 
 function init() {
-  // Render recent history
   renderRecent();
-
-  // Initialize chart
   clearChart();
-
-  // Build quick table
   buildQuickTable(0, DOM.dUnit.value);
-
-  // Apply isotope
   onIsotopeChange();
 
-  // Init history content closed
-  const hc = DOM.historyContent;
+  var hc = DOM.historyContent;
   if (hc) {
     hc.style.maxHeight = '0px';
     hc.setAttribute('aria-hidden', 'true');
     hc.inert = true;
   }
 
-  // Setup tabs (new nav)
   initTabs();
-
-  // Setup PWA
   setupPWA();
   registerServiceWorker();
 
-  // Resize handler for chart
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      const a0 = parseFloat(DOM.dA0.value);
-      const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-      const uKey = DOM.dUnit.value;
+    resizeTimer = setTimeout(function() {
+      var a0 = parseFloat(DOM.dA0.value);
+      var t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+      var uKey = DOM.dUnit.value;
       if (isFinite(a0) && a0 > 0) {
-        drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
+        drawDecayChart({ a0: a0, tCurrent: t, unitKey: uKey });
       } else {
         clearChart();
       }
@@ -2614,7 +2869,6 @@ function init() {
   });
 }
 
-// Run initialization
 init();
 </script>
 </body>
