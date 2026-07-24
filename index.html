@@ -46,10 +46,10 @@
   --radius-xl: 26px;
 
   /* Motion */
-  --motion-structural: 180ms;
+  --motion-structural: 200ms;
   --motion-tactile: 140ms;
   --motion-press: 20ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.15, 1);
 }
 
 /* ── Reset ─────────────────────────────────────── */
@@ -98,13 +98,14 @@ body::before {
 /* ── Reduced Motion ───────────────────────────── */
 @media(prefers-reduced-motion: reduce) {
   :root {
-    --motion-structural: 120ms;
-    --motion-tactile: 80ms;
+    --motion-structural: 80ms;
+    --motion-tactile: 50ms;
     --motion-press: 10ms;
   }
   .btn:hover:not(:disabled),
   .result-card:hover { transform: none !important; }
   html { scroll-behavior: auto; }
+  .nav-item.active .icon { animation: none !important; }
 }
 
 /* ═══════════════════════════════════════════════
@@ -275,6 +276,8 @@ body::before {
   box-shadow: 0 4px 14px rgba(0,0,0,.4);
   transform: translateZ(0);
   margin-bottom: 14px;
+  position: relative;
+  z-index: 10;
 }
 
 .nav-item {
@@ -290,29 +293,31 @@ body::before {
   position: relative;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-              padding 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: padding, background-color;
+  transition: background-color 0.35s var(--ease-standard),
+              padding 0.35s var(--ease-standard),
+              color 0.25s var(--ease-standard);
+  will-change: padding, background-color, color;
   flex: 1;
   min-width: 0;
+  touch-action: manipulation;
 }
 
 .nav-item svg {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.3s var(--ease-standard);
 }
 
 .nav-item .icon {
   display: block;
   opacity: 0.6;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s var(--ease-standard);
 }
 
 .nav-item:not(.active):hover .icon {
-  opacity: 1;
-  transform: scale(1.05);
+  opacity: 0.85;
+  transform: scale(1.04);
 }
 
 .nav-item .label {
@@ -323,9 +328,9 @@ body::before {
   font-weight: 600;
   opacity: 0;
   margin-left: 0;
-  transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-              opacity 0.25s cubic-bezier(0.25, 1, 0.5, 1),
-              margin-left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: max-width 0.35s var(--ease-standard),
+              opacity 0.25s var(--ease-standard),
+              margin-left 0.35s var(--ease-standard);
   will-change: max-width, opacity, margin-left;
 }
 
@@ -337,7 +342,10 @@ body::before {
 
 .nav-item.active .icon {
   opacity: 1;
-  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nav-item.active .icon {
+  animation: popIn 0.35s var(--ease-standard);
 }
 
 .nav-item.active .label {
@@ -348,6 +356,7 @@ body::before {
 
 @keyframes popIn {
   0% { transform: scale(0.8); }
+  60% { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
 
@@ -368,13 +377,19 @@ body::before {
   grid-area: 1/1;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--motion-structural) var(--ease-standard);
+  visibility: hidden;
+  transition: opacity var(--motion-structural) var(--ease-standard),
+              visibility 0s var(--motion-structural);
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 .tab-content.active {
   opacity: 1;
   pointer-events: auto;
-  transition: opacity var(--motion-structural) var(--ease-standard);
+  visibility: visible;
+  transition: opacity var(--motion-structural) var(--ease-standard),
+              visibility 0s 0s;
 }
 
 /* ── Grids ─────────────────────────────────────── */
@@ -1181,7 +1196,7 @@ canvas.decay-chart {
     <span class="label">Hoạt độ</span>
   </button>
   <button class="nav-item" data-tab="tools">
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/></svg>
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></svg>
     <span class="label">Công cụ</span>
   </button>
 </nav>
@@ -2410,55 +2425,27 @@ function initTabs() {
   const contents = DOM.tabContents;
   let active = document.querySelector('.nav-item.active');
 
-  function setPanelAccessibility(panel, isActive) {
-    const interactive = panel.querySelectorAll('a, button, input, select, textarea, [tabindex]');
-    if (isActive) {
-      panel.removeAttribute('aria-hidden');
-      panel.inert = false;
-      interactive.forEach(el => {
-        if (el.dataset.prevTabindex !== undefined) {
-          if (el.dataset.prevTabindex === '') {
-            el.removeAttribute('tabindex');
-          } else {
-            el.tabIndex = parseInt(el.dataset.prevTabindex, 10);
-          }
-          delete el.dataset.prevTabindex;
-        }
-      });
-    } else {
-      panel.setAttribute('aria-hidden', 'true');
-      panel.inert = true;
-      interactive.forEach(el => {
-        if (el.dataset.prevTabindex === undefined) {
-          el.dataset.prevTabindex = el.getAttribute('tabindex') ?? '';
-        }
-        el.tabIndex = -1;
-      });
-    }
-  }
-
-  contents.forEach(panel => {
-    setPanelAccessibility(panel, panel.classList.contains('active'));
-  });
-
   navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.dataset.tab;
+    item.addEventListener('click', function(e) {
+      const tabId = this.dataset.tab;
       const targetPanel = document.getElementById(tabId);
       if (!targetPanel) return;
 
+      // Only switch if not already active
+      if (this.classList.contains('active')) return;
+
       // Update nav items
       navItems.forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
+      this.classList.add('active');
 
-      // Update panels
+      // Update panels with smooth transition
       contents.forEach(p => {
         p.classList.remove('active');
-        setPanelAccessibility(p, false);
       });
 
+      // Force reflow for smooth transition
+      void targetPanel.offsetWidth;
       targetPanel.classList.add('active');
-      setPanelAccessibility(targetPanel, true);
     });
   });
 }
