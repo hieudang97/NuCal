@@ -1,2592 +1,3185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="manifest" href="manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NuCal">
-<meta name="theme-color" content="#0a0f14">
-<meta name="description" content="Bộ công cụ tính toán y học hạt nhân: phân rã phóng xạ, hoạt độ, kiểm tra chu kỳ bán rã.">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<title>NuCal — Nuclear Medicine Toolkit</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════════════
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="NuCal" />
+    <meta name="theme-color" content="#0a0f14" />
+    <meta
+      name="description"
+      content="Bộ công cụ tính toán y học hạt nhân: phân rã phóng xạ, hoạt độ, kiểm tra chu kỳ bán rã."
+    />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="icons/icon-192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="icons/icon-512.png"
+    />
+    <title>NuCal — Nuclear Medicine Toolkit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ═══════════════════════════════════════════════
    CSS — Constants & Design Tokens
    ═══════════════════════════════════════════════ */
 
-/* ── Variables ─────────────────────────────────── */
-:root {
-  /* Colors */
-  --bg: #0a0f14;
-  --border: rgba(255,255,255,.18);
-  --border-hi: rgba(255,255,255,.26);
-  --accent: #3ea6ff;
-  --green: #59d98e;
-  --orange: #ffb84d;
-  --red: #ff6b6b;
-  --text: #f4faff;
-  --muted: #c8ddef;
-  --muted2: #e4f2ff;
+      /* ── Variables ─────────────────────────────────── */
+      :root {
+        /* Colors */
+        --bg: #0a0f14;
+        --border: rgba(255, 255, 255, 0.18);
+        --border-hi: rgba(255, 255, 255, 0.26);
+        --accent: #3ea6ff;
+        --green: #59d98e;
+        --orange: #ffb84d;
+        --red: #ff6b6b;
+        --text: #f4faff;
+        --muted: #c8ddef;
+        --muted2: #e4f2ff;
 
-  /* Typography */
-  --font-ui: 'Be Vietnam Pro', system-ui, sans-serif;
-  --font-num: 'JetBrains Mono', monospace;
+        /* Typography */
+        --font-ui: "Be Vietnam Pro", system-ui, sans-serif;
+        --font-num: "JetBrains Mono", monospace;
 
-  /* Spacing */
-  --radius: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 26px;
+        /* Spacing */
+        --radius: 16px;
+        --radius-lg: 22px;
+        --radius-xl: 26px;
 
-  /* Motion */
-  --motion-structural: 200ms;
-  --motion-tactile: 140ms;
-  --motion-press: 20ms;
-  --ease-standard: cubic-bezier(0.25, 0.1, 0.15, 1);
-}
+        /* Motion */
+        --motion-structural: 200ms;
+        --motion-tactile: 140ms;
+        --motion-press: 20ms;
+        --ease-standard: cubic-bezier(0.25, 0.1, 0.15, 1);
+      }
 
-/* ── Reset ─────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+      /* ── Reset ─────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-html {
-  font-size: 14px;
-  -webkit-text-size-adjust: 100%;
-}
+      html {
+        font-size: 14px;
+        -webkit-text-size-adjust: 100%;
+      }
 
-body {
-  font-family: var(--font-ui);
-  background: #0a0f14;
-  min-height: 100vh;
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-}
+      body {
+        font-family: var(--font-ui);
+        background: #0a0f14;
+        min-height: 100vh;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        overflow-x: hidden;
+      }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: radial-gradient(ellipse 140% 60% at 50% 0%, #152232 0%, #0a0f14 68%);
-  pointer-events: none;
-}
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: radial-gradient(
+          ellipse 140% 60% at 50% 0%,
+          #152232 0%,
+          #0a0f14 68%
+        );
+        pointer-events: none;
+      }
 
-.app {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: env(safe-area-inset-top, 12px) 16px calc(40px + env(safe-area-inset-bottom, 0));
-}
+      .app {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: env(safe-area-inset-top, 12px) 16px
+          calc(40px + env(safe-area-inset-bottom, 0));
+      }
 
-/* ── Scrollbar ─────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 3px; }
+      /* ── Scrollbar ─────────────────────────────────── */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 3px;
+      }
 
-/* ── Reduced Motion ───────────────────────────── */
-@media(prefers-reduced-motion: reduce) {
-  :root {
-    --motion-structural: 80ms;
-    --motion-tactile: 50ms;
-    --motion-press: 10ms;
-  }
-  .btn:hover:not(:disabled),
-  .result-card:hover { transform: none !important; }
-  html { scroll-behavior: auto; }
-  .nav-item.active .icon { animation: none !important; }
-}
+      /* ── Reduced Motion ───────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          --motion-structural: 80ms;
+          --motion-tactile: 50ms;
+          --motion-press: 10ms;
+        }
+        .btn:hover:not(:disabled),
+        .result-card:hover {
+          transform: none !important;
+        }
+        html {
+          scroll-behavior: auto;
+        }
+        .nav-item.active .icon {
+          animation: none !important;
+        }
+      }
 
-/* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
    LAYOUT COMPONENTS
    ═══════════════════════════════════════════════ */
 
-/* ── Header ────────────────────────────────────── */
-.app-header {
-  text-align: center;
-  padding: 32px 0 20px;
-  margin-bottom: 20px;
-}
-
-.header-brand {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.brand-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 90px;
-  height: 90px;
-  flex-shrink: 0;
-  overflow: hidden;
-  background: linear-gradient(175deg, rgba(32,54,84,.94) 0%, rgba(10,24,46,.97) 100%);
-  border: 1px solid rgba(143,211,255,.32);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 0 0 1px rgba(62,166,255,.14), 0 6px 16px rgba(0,0,0,.4);
-}
-
-.brand-title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -.5px;
-  line-height: 1.2;
-  color: var(--text);
-  white-space: nowrap;
-  max-width: 82px;
-  text-align: center;
-}
-
-.brand-divider {
-  width: 1px;
-  height: 88px;
-  flex-shrink: 0;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.38), transparent);
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  text-align: left;
-}
-
-.brand-subtitle {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: .2px;
-  line-height: 1.4;
-  color: var(--text);
-  opacity: .72;
-}
-
-@media(max-width:480px) {
-  .brand-subtitle { font-size: 14px; }
-  .brand-divider { height: 76px; }
-}
-
-/* ── Panel ─────────────────────────────────────── */
-.panel {
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.01)), rgba(20,28,40,.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--radius-xl);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 6px 16px rgba(0,0,0,.36);
-  padding: 18px;
-  margin-bottom: 12px;
-}
-
-.panel-tight { padding: 14px 16px; margin-bottom: 12px; }
-
-.panel-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--muted2);
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.panel-title span {
-  font-family: var(--font-num);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--accent);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* ── Iso Bar ───────────────────────────────────── */
-.iso-bar {
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-  margin-bottom: 12px;
-}
-
-.iso-select {
-  flex: 0 0 58%;
-}
-
-.iso-select label {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  margin-bottom: 6px;
-  letter-spacing: .3px;
-}
-
-.hl-card {
-  flex: 1 1 auto;
-  background: rgba(62,166,255,.12);
-  border: 1px solid rgba(62,166,255,.30);
-  border-radius: var(--radius);
-  padding: 8px 12px;
-  text-align: center;
-  min-width: 120px;
-}
-
-.hl-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  color: var(--accent);
-  margin-bottom: 3px;
-}
-
-.hl-value {
-  font-family: var(--font-num);
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── Tabs (New Floating Navigation Bar) ───────── */
-.nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(20,30,45,.92);
-  padding: 4px 6px;
-  border-radius: 100px;
-  width: 100%;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 14px rgba(0,0,0,.4);
-  transform: translateZ(0);
-  margin-bottom: 14px;
-  position: relative;
-  z-index: 10;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
-  padding: 10px 12px;
-  border-radius: 100px;
-  position: relative;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.35s var(--ease-standard),
-              padding 0.35s var(--ease-standard),
-              color 0.25s var(--ease-standard);
-  will-change: padding, background-color, color;
-  flex: 1;
-  min-width: 0;
-  touch-action: manipulation;
-}
-
-.nav-item svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  transition: transform 0.3s var(--ease-standard);
-}
-
-.nav-item .icon {
-  display: block;
-  opacity: 0.6;
-  transition: opacity 0.3s var(--ease-standard);
-}
-
-.nav-item:not(.active):hover .icon {
-  opacity: 0.85;
-  transform: scale(1.04);
-}
-
-.nav-item .label {
-  max-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0;
-  margin-left: 0;
-  transition: max-width 0.35s var(--ease-standard),
-              opacity 0.25s var(--ease-standard),
-              margin-left 0.35s var(--ease-standard);
-  will-change: max-width, opacity, margin-left;
-}
-
-.nav-item.active {
-  background: rgba(62,166,255,.18);
-  padding: 10px 18px;
-  color: #fff;
-}
-
-.nav-item.active .icon {
-  opacity: 1;
-}
-
-.nav-item.active .icon {
-  animation: popIn 0.35s var(--ease-standard);
-}
-
-.nav-item.active .label {
-  max-width: 100px;
-  opacity: 1;
-  margin-left: 6px;
-}
-
-@keyframes popIn {
-  0% { transform: scale(0.8); }
-  60% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-@media(max-width:480px) {
-  .nav-item { padding: 8px 8px; }
-  .nav-item.active { padding: 8px 12px; }
-  .nav-item .label { font-size: 11px; }
-  .nav-item svg { width: 18px; height: 18px; }
-}
-
-/* ── Tab Panels ────────────────────────────────── */
-.tab-panels {
-  display: grid;
-  position: relative;
-}
-
-.tab-content {
-  grid-area: 1/1;
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  transition: opacity var(--motion-structural) var(--ease-standard),
-              visibility 0s var(--motion-structural);
-  will-change: opacity;
-  transform: translateZ(0);
-}
-
-.tab-content.active {
-  opacity: 1;
-  pointer-events: auto;
-  visibility: visible;
-  transition: opacity var(--motion-structural) var(--ease-standard),
-              visibility 0s 0s;
-}
-
-/* ── Grids ─────────────────────────────────────── */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.grid-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr .8fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.grid-rv { grid-template-columns: .75fr 1.5fr !important; }
-.grid-hl { grid-template-columns: 1fr 1fr !important; }
-
-/* ── Fields ────────────────────────────────────── */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  display: block;
-  text-align: center;
-}
-
-/* ── Inputs ────────────────────────────────────── */
-input, select {
-  width: 100%;
-  height: 50px;
-  background: rgba(255,255,255,.07);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--radius);
-  color: #fff;
-  font-family: var(--font-num);
-  font-size: 16px;
-  font-weight: 500;
-  text-align: center;
-  text-align-last: center;
-  outline: none;
-  transition: border-color .15s;
-  appearance: none;
-  -webkit-appearance: none;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.28);
-}
-
-input:focus, select:focus {
-  border-color: rgba(62,166,255,.6);
-  box-shadow: 0 0 0 4px rgba(62,166,255,.12), inset 0 1px 3px rgba(0,0,0,.28);
-}
-
-input::placeholder {
-  color: rgba(255,255,255,.22);
-  font-weight: 400;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] { -moz-appearance: textfield; }
-
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b8cfe0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 11px center;
-  padding-right: 28px;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted2);
-}
-
-.input-invalid {
-  border-color: rgba(255,107,107,.6) !important;
-  background: rgba(255,107,107,.06) !important;
-}
-
-/* ── Time Input ────────────────────────────────── */
-.time-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.time-wrap input {
-  padding-left: 0;
-  padding-right: 0;
-  letter-spacing: 3px;
-  font-size: 18px;
-}
-
-.time-colon {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-num);
-  font-size: 20px;
-  font-weight: 700;
-  color: rgba(255,255,255,.35);
-  pointer-events: none;
-  user-select: none;
-  line-height: 1;
-  margin-top: -1px;
-}
-
-.time-field {
-  font-size: 18px !important;
-  letter-spacing: 2px !important;
-  transition: border-color .15s, background .15s;
-}
-
-.time-field:focus { background: rgba(62,166,255,.10); }
-
-/* ── Divider ────────────────────────────────────── */
-.panel-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 16px 0;
-}
-
-/* ── Result Grid ───────────────────────────────── */
-.result-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr 1fr;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.result-card {
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 13px 8px;
-  text-align: center;
-  transition: transform var(--motion-tactile) var(--ease-standard),
-              opacity var(--motion-tactile) var(--ease-standard);
-  overflow: hidden;
-  min-width: 0;
-}
-
-.result-card:active {
-  transform: scale(.97);
-  transition-duration: var(--motion-press);
-}
-
-.result-card.main {
-  background: linear-gradient(175deg, rgba(32,54,84,.94) 0%, rgba(10,24,46,.97) 100%);
-  border: 1px solid rgba(143,211,255,.32);
-  box-shadow: 0 0 0 1px rgba(62,166,255,.14), 0 6px 16px rgba(0,0,0,.4);
-}
-
-.result-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.result-value {
-  font-family: var(--font-num);
-  font-weight: 700;
-  color: var(--muted2);
-  margin-top: 3px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  font-variant-numeric: tabular-nums;
-}
-
-.result-value.big {
-  font-size: clamp(14px, 5vw, 32px);
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: -1px;
-  line-height: 1.1;
-  text-shadow: 0 0 14px rgba(120,190,255,.22);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  max-width: 100%;
-  font-variant-numeric: tabular-nums;
-}
-
-.result-value.minus {
-  color: var(--red);
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-.result-value.plus {
-  color: var(--orange);
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-.result-unit {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
-  opacity: .78;
-  margin-top: 4px;
-}
-
-/* ── Info Rows ─────────────────────────────────── */
-.info-rows { padding-top: 12px; }
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(255,255,255,.05);
-  font-size: 13px;
-}
-.info-row:last-child { border-bottom: none; }
-
-.ik {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.iv {
-  font-family: var(--font-num);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted2);
-  font-variant-numeric: tabular-nums;
-}
-.iv.green { color: var(--green); }
-.iv.orange { color: var(--orange); }
-.iv.red { color: var(--red); }
-
-/* ── Formula Box ───────────────────────────────── */
-.formula-box {
-  margin-top: 14px;
-  margin-bottom: 0;
-  text-align: center;
-}
-
-.formula-box summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  user-select: none;
-}
-
-.formula-box summary::-webkit-details-marker { display: none; }
-details[open] > .formula { display: block; }
-
-.formula {
-  margin-top: 10px;
-  padding: 10px 14px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-family: var(--font-num);
-  font-size: 13px;
-  color: var(--muted2);
-  text-align: center;
-}
-
-/* ── Quick Table ───────────────────────────────── */
-.quick-table { padding: 16px; }
-
-.qt-a0-header-wrap { text-align: center; margin-bottom: 12px; }
-.qt-a0-header {
-  display: inline-block;
-  padding: 6px 20px;
-  background: rgba(62,166,255,.10);
-  border: 1px solid rgba(62,166,255,.28);
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted2);
-}
-
-.qt-head {
-  display: grid;
-  grid-template-columns: 1fr 1fr .7fr 1.3fr;
-  gap: 4px;
-  padding: 7px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  color: var(--muted);
-  text-align: center;
-}
-
-.qt-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr .7fr 1.3fr;
-  gap: 4px;
-  align-items: center;
-  padding: 10px 8px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  font-size: 13px;
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.qt-row:last-child { margin-bottom: 0; }
-.qt-time { color: var(--muted2); font-weight: 600; }
-.qt-val { font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
-.qt-pct { font-family: var(--font-num); font-size: 12px; font-variant-numeric: tabular-nums; }
-
-.bar-wrap {
-  height: 5px;
-  background: rgba(255,255,255,.10);
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 0 4px;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: opacity var(--motion-structural) var(--ease-standard);
-}
-
-/* ── Chart ─────────────────────────────────────── */
-.chart-panel { padding: 14px 16px 16px; overflow: hidden; }
-canvas.decay-chart {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  border-radius: 8px;
-}
-
-/* ── History ───────────────────────────────────── */
-.history-panel {
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)), rgba(20,28,40,.88);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--radius-xl);
-  margin-top: 12px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 24px rgba(0,0,0,.36);
-  overflow: hidden;
-}
-
-.history-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: none;
-  border: none;
-  color: var(--muted2);
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 15px 18px;
-  text-align: left;
-  transition: opacity var(--motion-tactile) var(--ease-standard),
-              filter var(--motion-tactile) var(--ease-standard);
-}
-
-.history-toggle:active {
-  opacity: .8;
-  filter: brightness(.92);
-  transition-duration: var(--motion-press);
-}
-
-.history-chevron {
-  font-size: 20px;
-  color: var(--accent);
-  font-weight: 700;
-  line-height: 1;
-  display: inline-block;
-}
-
-.history-content {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  padding: 0 16px;
-  transition: max-height var(--motion-structural) var(--ease-standard),
-              opacity var(--motion-structural) var(--ease-standard);
-  pointer-events: none;
-  overscroll-behavior: contain;
-}
-
-.history-panel.open .history-content {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.history-content-inner {
-  max-height: 396px;
-  overflow-y: auto;
-  padding-bottom: 14px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-.recent-header {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 6px;
-  padding: 6px 10px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  color: var(--muted);
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  margin-bottom: 8px;
-}
-
-.recent-row {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  gap: 8px;
-  align-items: center;
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 10px;
-  margin-bottom: 7px;
-}
-
-.recent-row:last-child { margin-bottom: 0; }
-
-.iso-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  background: rgba(62,166,255,.12);
-  border: 1px solid rgba(62,166,255,.28);
-  border-radius: 10px;
-  font-family: var(--font-num);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--accent);
-  line-height: 1.25;
-  text-align: center;
-  word-break: break-word;
-}
-
-.rr-body { min-width: 0; }
-.rr-ts {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-}
-.ri-body { flex: 1; min-width: 0; }
-.ri-main {
-  font-family: var(--font-num);
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-}
-.ri-sub {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.ri-ts {
-  font-size: 11px;
-  color: var(--muted);
-  white-space: nowrap;
-  text-align: right;
-  line-height: 1.4;
-  flex-shrink: 0;
-}
-.ri-ts-date {
-  color: var(--muted2);
-  font-weight: 700;
-  display: block;
-  font-size: 10px;
-}
-.ri-ts-time {
-  color: var(--muted);
-  font-size: 10px;
-  display: block;
-}
-
-/* ── RT Boxes ──────────────────────────────────── */
-.rt-results-panel { transition: opacity var(--motion-structural) var(--ease-standard); }
-.rt-layout {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-}
-.rt-boxes { display: flex; flex-direction: column; gap: 7px; }
-.rt-box {
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 13px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.rt-box-label {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
-.rt-box-value {
-  font-family: var(--font-num);
-  font-size: 17px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.result-at { color: var(--green); }
-
-.arc-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-}
-.arc-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-@media(max-width:480px) {
-  .rt-layout { grid-template-columns: 1fr; }
-  .arc-wrap { display: none; }
-}
-
-/* ── QC Range Bar ──────────────────────────────── */
-.qc-bar-wrap { margin: 22px 0 2px; position: relative; height: 5px; }
-.qc-bar {
-  height: 5px;
-  border-radius: 3px;
-  width: 100%;
-  opacity: .5;
-  transition: opacity var(--motion-structural) var(--ease-standard);
-  background: linear-gradient(to right,
-    rgba(220,65,65,1) 0%,
-    rgba(215,130,35,1) 30%,
-    rgba(50,190,90,1) 50%,
-    rgba(215,130,35,1) 70%,
-    rgba(220,65,65,1) 100%
-  );
-}
-.qc-bar.active { opacity: .9; }
-
-.qc-marker {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 3px;
-  height: 13px;
-  border-radius: 2px;
-  background: rgba(228,242,255,.9);
-  box-shadow: 0 0 4px rgba(0,0,0,.4);
-  transition: left var(--motion-tactile) var(--ease-standard);
-  pointer-events: none;
-  display: none;
-}
-
-.qc-label-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-  margin-bottom: 14px;
-  font-size: 10px;
-  opacity: .45;
-  line-height: 1;
-}
-
-/* ── Buttons ───────────────────────────────────── */
-.btn {
-  width: 100%;
-  min-height: 48px;
-  margin-top: 14px;
-  background: rgba(62,166,255,.18);
-  border: 1px solid rgba(62,166,255,.3);
-  border-radius: var(--radius);
-  color: #fff;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 700;
-  transition: transform var(--motion-tactile) var(--ease-standard),
-              opacity var(--motion-tactile) var(--ease-standard),
-              background-color var(--motion-tactile) var(--ease-standard);
-}
-
-.btn:hover:not(:disabled) {
-  background: rgba(62,166,255,.28);
-  box-shadow: 0 5px 18px rgba(62,166,255,.2);
-}
-
-.btn:active:not(:disabled) {
-  transform: scale(.985);
-  transition-duration: var(--motion-press);
-}
-
-.btn:disabled {
-  opacity: .3;
-  cursor: not-allowed;
-}
-
-.btn-sm {
-  width: auto;
-  min-height: 32px;
-  margin-top: 0;
-  font-size: 12px;
-  padding: 0 13px;
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.14);
-}
-
-.btn-sm:hover:not(:disabled) {
-  background: rgba(255,107,107,.12);
-  border-color: rgba(255,107,107,.3);
-  color: var(--red);
-  box-shadow: none;
-  transform: none;
-}
-
-/* ── Eval badges ───────────────────────────────── */
-.eval-ok { color: var(--green); font-weight: 700; }
-.eval-warn { color: var(--orange); font-weight: 700; }
-.eval-bad { color: var(--red); font-weight: 700; }
-
-.empty-state {
-  color: rgba(228,242,255,.55);
-  font-size: 12px;
-  text-align: center;
-  padding: 20px 16px;
-}
-
-/* ── Utilities ─────────────────────────────────── */
-.hidden { display: none !important; }
-.flex-end { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.text-muted-xs { font-size: 10px; color: var(--muted); }
-.mb-0 { margin-bottom: 0 !important; }
-.mb-10 { margin-bottom: 10px; }
-.val-lg { font-size: 28px !important; }
-.val-md { font-size: 22px !important; color: #fff !important; }
-.val-rv { font-size: 16px !important; }
-
-/* ── PWA Install Banner ────────────────────────── */
-.pwa-banner {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(110%);
-  width: min(560px, 100vw);
-  background: linear-gradient(135deg, rgba(20,35,55,.97), rgba(10,20,34,.99));
-  border: 1px solid rgba(62,166,255,.32);
-  border-bottom: none;
-  border-radius: 18px 18px 0 0;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom,0));
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 -4px 16px rgba(0,0,0,.4);
-  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
-  z-index: 9999;
-}
-
-.pwa-banner.show { transform: translateX(-50%) translateY(0); }
-
-.pwa-banner-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-  line-height: 1;
-  color: var(--accent);
-}
-
-.pwa-banner-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.pwa-banner-text strong {
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.pwa-banner-text span {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.pwa-btn-install {
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 16px;
-  background: rgba(62,166,255,.22);
-  border: 1px solid rgba(62,166,255,.4);
-  border-radius: 10px;
-  color: #fff;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .15s;
-  white-space: nowrap;
-}
-
-.pwa-btn-install:hover { background: rgba(62,166,255,.38); }
-
-.pwa-btn-dismiss {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  padding: 0;
-}
-</style>
-</head>
-<body>
-<div class="app">
-
-<!-- ── Header ─────────────────────────────────────── -->
-<header class="app-header">
-  <div class="header-brand">
-    <div class="brand-logo">
-      <div class="brand-title">NuCal</div>
-    </div>
-    <div class="brand-divider"></div>
-    <div class="brand-text">
-      <div class="brand-subtitle">Nuclear<br>Medicine<br>Toolkit</div>
-    </div>
-  </div>
-</header>
-
-<!-- ── Iso bar ────────────────────────────────────── -->
-<div class="panel panel-tight">
-  <div class="iso-bar">
-    <div class="iso-select">
-      <label>Đồng vị phóng xạ</label>
-      <select id="isotope" onchange="handlers.isotopeChange()">
-        <option value="Tc99m">Tc-99m</option>
-        <option value="Ga68">Ga-68</option>
-        <option value="F18">F-18</option>
-        <option value="I131">I-131</option>
-        <option value="Lu177">Lu-177</option>
-      </select>
-    </div>
-    <div class="hl-card">
-      <div class="hl-title">T½</div>
-      <div class="hl-value" id="hl_display">—</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Tabs (New Floating Navigation Bar) ────────── -->
-<nav class="nav-bar" id="tabBar">
-  <button class="nav-item active" data-tab="decay">
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg>
-    <span class="label">Phân rã</span>
-  </button>
-  <button class="nav-item" data-tab="activity">
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
-    <span class="label">Hoạt độ</span>
-  </button>
-  <button class="nav-item" data-tab="tools">
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></svg>
-    <span class="label">Công cụ</span>
-  </button>
-</nav>
-
-<div class="tab-panels">
-
-<!-- ═══════════ TAB 1 — PHÂN RÃ ════════════════════ -->
-<section class="tab-content active" id="decay">
-  <div class="panel">
-    <div class="panel-title">Tính hoạt độ phân rã <span id="iso-label-decay">Tc-99m</span></div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="d_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.decay()" onblur="handlers.normalizeDot(this)">
-      </div>
-      <div class="field">
-        <label>Đơn vị</label>
-        <select id="d_unit" onchange="handlers.decay()">
-          <option value="mCi">mCi</option>
-          <option value="MBq">MBq</option>
-          <option value="GBq">GBq</option>
-          <option value="uCi">µCi</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Thời gian (t)</label>
-        <input type="text" inputmode="decimal" id="d_time" placeholder="0" maxlength="11" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this,6,4);handlers.decay()" onblur="handlers.normalizeDot(this)">
-      </div>
-      <div class="field">
-        <label>Đơn vị</label>
-        <select id="d_time_unit" onchange="handlers.decay()">
-          <option value="min">phút</option>
-          <option value="hr">giờ</option>
-          <option value="day">ngày</option>
-        </select>
-      </div>
-    </div>
-
-    <hr class="panel-divider">
-    <div class="result-grid">
-      <div class="result-card">
-        <div class="result-label">−5%</div>
-        <div class="result-value minus" id="at_minus">—</div>
-        <div class="result-unit" id="at_minus_u">mCi</div>
-      </div>
-      <div class="result-card main">
-        <div class="result-label" style="text-transform:none">A(t)</div>
-        <div class="result-value big" id="at_main">—</div>
-        <div class="result-unit" id="at_main_u">mCi</div>
-      </div>
-      <div class="result-card">
-        <div class="result-label">+5%</div>
-        <div class="result-value plus" id="at_plus">—</div>
-        <div class="result-unit" id="at_plus_u">mCi</div>
-      </div>
-    </div>
-
-    <div id="d_info_panel" class="hidden">
-      <div class="info-rows">
-        <div class="info-row"><span class="ik">Hoạt độ còn lại</span><span class="iv green" id="d_pct">—</span></div>
-        <div class="info-row"><span class="ik">Số chu kỳ bán rã đã qua</span><span class="iv" id="d_hl_n">—</span></div>
-        <div class="info-row"><span class="ik">Hoạt độ đã phân rã</span><span class="iv orange" id="d_decayed">—</span></div>
-      </div>
-      <button class="btn" onclick="handlers.saveDecay()">Lưu kết quả</button>
-    </div>
-
-    <details class="formula-box">
-      <summary>ⓘ Công thức áp dụng</summary>
-      <div class="formula">A(t) = A₀ × exp(−ln2 · t / T½)</div>
-    </details>
-  </div>
-
-  <!-- Quick table -->
-  <div class="panel quick-table">
-    <div class="panel-title">Bảng phân rã nhanh <span id="qt_iso_label">Tc-99m</span></div>
-    <div class="qt-a0-header-wrap">
-      <div class="qt-a0-header hidden" id="qt_a0_header"></div>
-    </div>
-    <div class="qt-head">
-      <div>Thời gian</div><div>A(t)</div><div>%</div><div>Tiến trình</div>
-    </div>
-    <div id="qt_rows"><div class="empty-state">Nhập A₀ để xem bảng phân rã</div></div>
-  </div>
-
-  <!-- Chart -->
-  <div class="panel chart-panel">
-    <div class="panel-title">Đồ thị phân rã</div>
-    <canvas id="decayChart" class="decay-chart" height="160"></canvas>
-  </div>
-
-  <!-- History -->
-  <div class="history-panel" id="historyPanel">
-    <button class="history-toggle" onclick="handlers.toggleHistory()">
-      <span>Lịch sử gần đây</span>
-      <span class="history-chevron" id="histChev">+</span>
-    </button>
-    <div class="history-content" id="historyContent">
-      <div class="history-content-inner">
-        <div class="flex-end">
-          <button class="btn btn-sm" onclick="if(confirm('Xóa toàn bộ lịch sử?'))handlers.clearRecent()">Xóa tất cả</button>
-        </div>
-        <div id="recentList"><div class="empty-state">Chưa có kết quả nào</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════ TAB 2 — HOẠT ĐỘ ════════════════════ -->
-<section class="tab-content" id="activity">
-  <!-- Realtime -->
-  <div class="panel">
-    <div class="panel-title">Hoạt độ theo thời gian thực <span id="iso-label-rt">Tc-99m</span></div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="rt_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.realtime()" onblur="handlers.normalizeDot(this)">
-      </div>
-      <div class="field">
-        <label>Đơn vị</label>
-        <select id="rt_unit" onchange="handlers.realtime()">
-          <option value="mCi">mCi</option>
-          <option value="MBq">MBq</option>
-          <option value="GBq">GBq</option>
-          <option value="uCi">µCi</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Thời điểm thực hiện</label>
-        <div class="time-wrap">
-          <input type="text" inputmode="numeric" id="rt_start" placeholder="08:00" maxlength="5"
-                 class="time-field"
-                 onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.realtime)">
-        </div>
-      </div>
-      <div class="field">
-        <label>Thời điểm sử dụng</label>
-        <div class="time-wrap">
-          <input type="text" inputmode="numeric" id="rt_end" placeholder="11:00" maxlength="5"
-                 class="time-field"
-                 onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.realtime)">
-        </div>
-      </div>
-    </div>
-
-    <hr class="panel-divider">
-    <div id="rt_results" style="opacity:.3" class="rt-results-panel">
-      <div class="rt-layout">
-        <div class="rt-boxes">
-          <div class="rt-box">
-            <span class="rt-box-label">Chênh lệch thời gian (Δt)</span>
-            <span class="rt-box-value" id="rt_delta">—</span>
+      /* ── Header ────────────────────────────────────── */
+      .app-header {
+        text-align: center;
+        padding: 32px 0 20px;
+        margin-bottom: 20px;
+      }
+
+      .header-brand {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .brand-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        flex-shrink: 0;
+        overflow: hidden;
+        background: linear-gradient(
+          175deg,
+          rgba(32, 54, 84, 0.94) 0%,
+          rgba(10, 24, 46, 0.97) 100%
+        );
+        border: 1px solid rgba(143, 211, 255, 0.32);
+        border-radius: var(--radius-lg);
+        box-shadow:
+          0 0 0 1px rgba(62, 166, 255, 0.14),
+          0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+
+      .brand-title {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        color: var(--text);
+        white-space: nowrap;
+        max-width: 82px;
+        text-align: center;
+      }
+
+      .brand-divider {
+        width: 1px;
+        height: 88px;
+        flex-shrink: 0;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(255, 255, 255, 0.38),
+          transparent
+        );
+      }
+
+      .brand-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        text-align: left;
+      }
+
+      .brand-subtitle {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        line-height: 1.4;
+        color: var(--text);
+        opacity: 0.72;
+      }
+
+      @media (max-width: 480px) {
+        .brand-subtitle {
+          font-size: 14px;
+        }
+        .brand-divider {
+          height: 76px;
+        }
+      }
+
+      /* ── Panel ─────────────────────────────────────── */
+      .panel {
+        background:
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.06),
+            rgba(255, 255, 255, 0.01)
+          ),
+          rgba(20, 28, 40, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-hi);
+        border-radius: var(--radius-xl);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.09),
+          0 6px 16px rgba(0, 0, 0, 0.36);
+        padding: 18px;
+        margin-bottom: 12px;
+      }
+
+      .panel-tight {
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted2);
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .panel-title span {
+        font-family: var(--font-num);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--accent);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+
+      /* ── Iso Bar ───────────────────────────────────── */
+      .iso-bar {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        margin-bottom: 12px;
+      }
+
+      .iso-select {
+        flex: 0 0 58%;
+      }
+
+      .iso-select label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
+      }
+
+      .hl-card {
+        flex: 1 1 auto;
+        background: rgba(62, 166, 255, 0.12);
+        border: 1px solid rgba(62, 166, 255, 0.3);
+        border-radius: var(--radius);
+        padding: 8px 12px;
+        text-align: center;
+        min-width: 120px;
+      }
+
+      .hl-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--accent);
+        margin-bottom: 3px;
+      }
+
+      .hl-value {
+        font-family: var(--font-num);
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ── Tabs (New Floating Navigation Bar) ───────── */
+      .nav-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(20, 30, 45, 0.92);
+        padding: 4px 6px;
+        border-radius: 100px;
+        width: 100%;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        transform: translateZ(0);
+        margin-bottom: 14px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        padding: 10px 12px;
+        border-radius: 100px;
+        position: relative;
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background-color 0.35s var(--ease-standard),
+          padding 0.35s var(--ease-standard),
+          color 0.25s var(--ease-standard);
+        will-change: padding, background-color, color;
+        flex: 1;
+        min-width: 0;
+        touch-action: manipulation;
+      }
+
+      .nav-item svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        transition: transform 0.3s var(--ease-standard);
+      }
+
+      .nav-item .icon {
+        display: block;
+        opacity: 0.6;
+        transition: opacity 0.3s var(--ease-standard);
+      }
+
+      .nav-item:not(.active):hover .icon {
+        opacity: 0.85;
+        transform: scale(1.04);
+      }
+
+      .nav-item .label {
+        max-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        margin-left: 0;
+        transition:
+          max-width 0.35s var(--ease-standard),
+          opacity 0.25s var(--ease-standard),
+          margin-left 0.35s var(--ease-standard);
+        will-change: max-width, opacity, margin-left;
+      }
+
+      .nav-item.active {
+        background: rgba(62, 166, 255, 0.18);
+        padding: 10px 18px;
+        color: #fff;
+      }
+
+      .nav-item.active .icon {
+        opacity: 1;
+      }
+
+      .nav-item.active .icon {
+        animation: popIn 0.35s var(--ease-standard);
+      }
+
+      .nav-item.active .label {
+        max-width: 100px;
+        opacity: 1;
+        margin-left: 6px;
+      }
+
+      @keyframes popIn {
+        0% {
+          transform: scale(0.8);
+        }
+        60% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .nav-item {
+          padding: 8px 8px;
+        }
+        .nav-item.active {
+          padding: 8px 12px;
+        }
+        .nav-item .label {
+          font-size: 11px;
+        }
+        .nav-item svg {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      /* ── Tab Panels ────────────────────────────────── */
+      .tab-panels {
+        display: grid;
+        position: relative;
+      }
+
+      .tab-content {
+        grid-area: 1/1;
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transition:
+          opacity var(--motion-structural) var(--ease-standard),
+          visibility 0s var(--motion-structural);
+        will-change: opacity;
+        transform: translateZ(0);
+      }
+
+      .tab-content.active {
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+        transition:
+          opacity var(--motion-structural) var(--ease-standard),
+          visibility 0s 0s;
+      }
+
+      /* ── Grids ─────────────────────────────────────── */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 0.8fr;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .grid-rv {
+        grid-template-columns: 0.75fr 1.5fr !important;
+      }
+      .grid-hl {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      /* ── Fields ────────────────────────────────────── */
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        display: block;
+        text-align: center;
+      }
+
+      /* ── Inputs ────────────────────────────────────── */
+      input,
+      select {
+        width: 100%;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--border-hi);
+        border-radius: var(--radius);
+        color: #fff;
+        font-family: var(--font-num);
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        text-align-last: center;
+        outline: none;
+        transition: border-color 0.15s;
+        appearance: none;
+        -webkit-appearance: none;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
+      }
+
+      input:focus,
+      select:focus {
+        border-color: rgba(62, 166, 255, 0.6);
+        box-shadow:
+          0 0 0 4px rgba(62, 166, 255, 0.12),
+          inset 0 1px 3px rgba(0, 0, 0, 0.28);
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.22);
+        font-weight: 400;
+      }
+
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b8cfe0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 11px center;
+        padding-right: 28px;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--muted2);
+      }
+
+      .input-invalid {
+        border-color: rgba(255, 107, 107, 0.6) !important;
+        background: rgba(255, 107, 107, 0.06) !important;
+      }
+
+      /* ── Time Input ────────────────────────────────── */
+      .time-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .time-wrap input {
+        padding-left: 0;
+        padding-right: 0;
+        letter-spacing: 3px;
+        font-size: 18px;
+      }
+
+      .time-colon {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: var(--font-num);
+        font-size: 20px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.35);
+        pointer-events: none;
+        user-select: none;
+        line-height: 1;
+        margin-top: -1px;
+      }
+
+      .time-field {
+        font-size: 18px !important;
+        letter-spacing: 2px !important;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .time-field:focus {
+        background: rgba(62, 166, 255, 0.1);
+      }
+
+      /* ── Divider ────────────────────────────────────── */
+      .panel-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 16px 0;
+      }
+
+      /* ── Result Grid ───────────────────────────────── */
+      .result-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.3fr 1fr;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .result-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 13px 8px;
+        text-align: center;
+        transition:
+          transform var(--motion-tactile) var(--ease-standard),
+          opacity var(--motion-tactile) var(--ease-standard);
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .result-card:active {
+        transform: scale(0.97);
+        transition-duration: var(--motion-press);
+      }
+
+      .result-card.main {
+        background: linear-gradient(
+          175deg,
+          rgba(32, 54, 84, 0.94) 0%,
+          rgba(10, 24, 46, 0.97) 100%
+        );
+        border: 1px solid rgba(143, 211, 255, 0.32);
+        box-shadow:
+          0 0 0 1px rgba(62, 166, 255, 0.14),
+          0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+
+      .result-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .result-value {
+        font-family: var(--font-num);
+        font-weight: 700;
+        color: var(--muted2);
+        margin-top: 3px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .result-value.big {
+        font-size: clamp(14px, 5vw, 32px);
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        text-shadow: 0 0 14px rgba(120, 190, 255, 0.22);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        max-width: 100%;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .result-value.minus {
+        color: var(--red);
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+
+      .result-value.plus {
+        color: var(--orange);
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+
+      .result-unit {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        opacity: 0.78;
+        margin-top: 4px;
+      }
+
+      /* ── Info Rows ─────────────────────────────────── */
+      .info-rows {
+        padding-top: 12px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 13px;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .ik {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .iv {
+        font-family: var(--font-num);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted2);
+        font-variant-numeric: tabular-nums;
+      }
+      .iv.green {
+        color: var(--green);
+      }
+      .iv.orange {
+        color: var(--orange);
+      }
+      .iv.red {
+        color: var(--red);
+      }
+
+      /* ── Formula Box ───────────────────────────────── */
+      .formula-box {
+        margin-top: 14px;
+        margin-bottom: 0;
+        text-align: center;
+      }
+
+      .formula-box summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        user-select: none;
+      }
+
+      .formula-box summary::-webkit-details-marker {
+        display: none;
+      }
+      details[open] > .formula {
+        display: block;
+      }
+
+      .formula {
+        margin-top: 10px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-family: var(--font-num);
+        font-size: 13px;
+        color: var(--muted2);
+        text-align: center;
+      }
+
+      /* ── Quick Table ───────────────────────────────── */
+      .quick-table {
+        padding: 16px;
+      }
+
+      .qt-a0-header-wrap {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      .qt-a0-header {
+        display: inline-block;
+        padding: 6px 20px;
+        background: rgba(62, 166, 255, 0.1);
+        border: 1px solid rgba(62, 166, 255, 0.28);
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted2);
+      }
+
+      .qt-head {
+        display: grid;
+        grid-template-columns: 1fr 1fr 0.7fr 1.3fr;
+        gap: 4px;
+        padding: 7px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .qt-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 0.7fr 1.3fr;
+        gap: 4px;
+        align-items: center;
+        padding: 10px 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 6px;
+      }
+
+      .qt-row:last-child {
+        margin-bottom: 0;
+      }
+      .qt-time {
+        color: var(--muted2);
+        font-weight: 600;
+      }
+      .qt-val {
+        font-family: var(--font-num);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      .qt-pct {
+        font-family: var(--font-num);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .bar-wrap {
+        height: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        overflow: hidden;
+        margin: 0 4px;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: opacity var(--motion-structural) var(--ease-standard);
+      }
+
+      /* ── Chart ─────────────────────────────────────── */
+      .chart-panel {
+        padding: 14px 16px 16px;
+        overflow: hidden;
+      }
+      canvas.decay-chart {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+      }
+
+      /* ── History ───────────────────────────────────── */
+      .history-panel {
+        background:
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.04),
+            rgba(255, 255, 255, 0.01)
+          ),
+          rgba(20, 28, 40, 0.88);
+        border: 1px solid var(--border-hi);
+        border-radius: var(--radius-xl);
+        margin-top: 12px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.07),
+          0 8px 24px rgba(0, 0, 0, 0.36);
+        overflow: hidden;
+      }
+
+      .history-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: none;
+        border: none;
+        color: var(--muted2);
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 700;
+        padding: 15px 18px;
+        text-align: left;
+        transition:
+          opacity var(--motion-tactile) var(--ease-standard),
+          filter var(--motion-tactile) var(--ease-standard);
+      }
+
+      .history-toggle:active {
+        opacity: 0.8;
+        filter: brightness(0.92);
+        transition-duration: var(--motion-press);
+      }
+
+      .history-chevron {
+        font-size: 20px;
+        color: var(--accent);
+        font-weight: 700;
+        line-height: 1;
+        display: inline-block;
+      }
+
+      .history-content {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        padding: 0 16px;
+        transition:
+          max-height var(--motion-structural) var(--ease-standard),
+          opacity var(--motion-structural) var(--ease-standard);
+        pointer-events: none;
+        overscroll-behavior: contain;
+      }
+
+      .history-panel.open .history-content {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .history-content-inner {
+        max-height: 396px;
+        overflow-y: auto;
+        padding-bottom: 14px;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+
+      .recent-header {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        gap: 6px;
+        padding: 6px 10px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: var(--muted);
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        margin-bottom: 8px;
+      }
+
+      .recent-row {
+        display: grid;
+        grid-template-columns: 44px 1fr 44px;
+        gap: 8px;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 10px;
+        margin-bottom: 7px;
+      }
+
+      .recent-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .iso-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        background: rgba(62, 166, 255, 0.12);
+        border: 1px solid rgba(62, 166, 255, 0.28);
+        border-radius: 10px;
+        font-family: var(--font-num);
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+        line-height: 1.25;
+        text-align: center;
+        word-break: break-word;
+      }
+
+      .rr-body {
+        min-width: 0;
+      }
+      .rr-ts {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+      }
+      .ri-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .ri-main {
+        font-family: var(--font-num);
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .ri-sub {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .ri-ts {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+        text-align: right;
+        line-height: 1.4;
+        flex-shrink: 0;
+      }
+      .ri-ts-date {
+        color: var(--muted2);
+        font-weight: 700;
+        display: block;
+        font-size: 10px;
+      }
+      .ri-ts-time {
+        color: var(--muted);
+        font-size: 10px;
+        display: block;
+      }
+
+      /* ── RT Boxes ──────────────────────────────────── */
+      .rt-results-panel {
+        transition: opacity var(--motion-structural) var(--ease-standard);
+      }
+      .rt-layout {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
+      .rt-boxes {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .rt-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .rt-box-label {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .rt-box-value {
+        font-family: var(--font-num);
+        font-size: 17px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+      .result-at {
+        color: var(--green);
+      }
+
+      .arc-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+      .arc-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      @media (max-width: 480px) {
+        .rt-layout {
+          grid-template-columns: 1fr;
+        }
+        .arc-wrap {
+          display: none;
+        }
+      }
+
+      /* ── QC Range Bar ──────────────────────────────── */
+      .qc-bar-wrap {
+        margin: 22px 0 2px;
+        position: relative;
+        height: 5px;
+      }
+      .qc-bar {
+        height: 5px;
+        border-radius: 3px;
+        width: 100%;
+        opacity: 0.5;
+        transition: opacity var(--motion-structural) var(--ease-standard);
+        background: linear-gradient(
+          to right,
+          rgba(220, 65, 65, 1) 0%,
+          rgba(215, 130, 35, 1) 30%,
+          rgba(50, 190, 90, 1) 50%,
+          rgba(215, 130, 35, 1) 70%,
+          rgba(220, 65, 65, 1) 100%
+        );
+      }
+      .qc-bar.active {
+        opacity: 0.9;
+      }
+
+      .qc-marker {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 3px;
+        height: 13px;
+        border-radius: 2px;
+        background: rgba(228, 242, 255, 0.9);
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+        transition: left var(--motion-tactile) var(--ease-standard);
+        pointer-events: none;
+        display: none;
+      }
+
+      .qc-label-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        margin-bottom: 14px;
+        font-size: 10px;
+        opacity: 0.45;
+        line-height: 1;
+      }
+
+      /* ── Buttons ───────────────────────────────────── */
+      .btn {
+        width: 100%;
+        min-height: 48px;
+        margin-top: 14px;
+        background: rgba(62, 166, 255, 0.18);
+        border: 1px solid rgba(62, 166, 255, 0.3);
+        border-radius: var(--radius);
+        color: #fff;
+        cursor: pointer;
+        font-family: var(--font-ui);
+        font-size: 14px;
+        font-weight: 700;
+        transition:
+          transform var(--motion-tactile) var(--ease-standard),
+          opacity var(--motion-tactile) var(--ease-standard),
+          background-color var(--motion-tactile) var(--ease-standard);
+      }
+
+      .btn:hover:not(:disabled) {
+        background: rgba(62, 166, 255, 0.28);
+        box-shadow: 0 5px 18px rgba(62, 166, 255, 0.2);
+      }
+
+      .btn:active:not(:disabled) {
+        transform: scale(0.985);
+        transition-duration: var(--motion-press);
+      }
+
+      .btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .btn-sm {
+        width: auto;
+        min-height: 32px;
+        margin-top: 0;
+        font-size: 12px;
+        padding: 0 13px;
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+
+      .btn-sm:hover:not(:disabled) {
+        background: rgba(255, 107, 107, 0.12);
+        border-color: rgba(255, 107, 107, 0.3);
+        color: var(--red);
+        box-shadow: none;
+        transform: none;
+      }
+
+      /* ── Eval badges ───────────────────────────────── */
+      .eval-ok {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .eval-warn {
+        color: var(--orange);
+        font-weight: 700;
+      }
+      .eval-bad {
+        color: var(--red);
+        font-weight: 700;
+      }
+
+      .empty-state {
+        color: rgba(228, 242, 255, 0.55);
+        font-size: 12px;
+        text-align: center;
+        padding: 20px 16px;
+      }
+
+      /* ── Utilities ─────────────────────────────────── */
+      .hidden {
+        display: none !important;
+      }
+      .flex-end {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+      }
+      .text-muted-xs {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .mb-0 {
+        margin-bottom: 0 !important;
+      }
+      .mb-10 {
+        margin-bottom: 10px;
+      }
+      .val-lg {
+        font-size: 28px !important;
+      }
+      .val-md {
+        font-size: 22px !important;
+        color: #fff !important;
+      }
+      .val-rv {
+        font-size: 16px !important;
+      }
+
+      /* ── PWA Install Banner ────────────────────────── */
+      .pwa-banner {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%) translateY(110%);
+        width: min(560px, 100vw);
+        background: linear-gradient(
+          135deg,
+          rgba(20, 35, 55, 0.97),
+          rgba(10, 20, 34, 0.99)
+        );
+        border: 1px solid rgba(62, 166, 255, 0.32);
+        border-bottom: none;
+        border-radius: 18px 18px 0 0;
+        padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0));
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 9999;
+      }
+
+      .pwa-banner.show {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .pwa-banner-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+        line-height: 1;
+        color: var(--accent);
+      }
+
+      .pwa-banner-text {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .pwa-banner-text strong {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .pwa-banner-text span {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .pwa-btn-install {
+        flex-shrink: 0;
+        height: 36px;
+        padding: 0 16px;
+        background: rgba(62, 166, 255, 0.22);
+        border: 1px solid rgba(62, 166, 255, 0.4);
+        border-radius: 10px;
+        color: #fff;
+        font-family: var(--font-ui);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+
+      .pwa-btn-install:hover {
+        background: rgba(62, 166, 255, 0.38);
+      }
+
+      .pwa-btn-dismiss {
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- ── Header ─────────────────────────────────────── -->
+      <header class="app-header">
+        <div class="header-brand">
+          <div class="brand-logo">
+            <div class="brand-title">NuCal</div>
           </div>
-          <div class="rt-box">
-            <span class="rt-box-label">A(t) <span class="text-muted-xs" id="rt_unit_lbl">mCi</span></span>
-            <span class="rt-box-value result-at" id="rt_result">—</span>
-          </div>
-          <div class="rt-box">
-            <span class="rt-box-label">Còn lại</span>
-            <span class="rt-box-value" id="rt_pct">—</span>
+          <div class="brand-divider"></div>
+          <div class="brand-text">
+            <div class="brand-subtitle">Nuclear<br />Medicine<br />Toolkit</div>
           </div>
         </div>
-        <div class="arc-wrap">
-          <canvas id="rtArc" width="88" height="88"></canvas>
-          <div class="arc-label">Còn lại</div>
+      </header>
+
+      <!-- ── Iso bar ────────────────────────────────────── -->
+      <div class="panel panel-tight">
+        <div class="iso-bar">
+          <div class="iso-select">
+            <label>Đồng vị phóng xạ</label>
+            <select id="isotope" onchange="handlers.isotopeChange()">
+              <option value="Tc99m">Tc-99m</option>
+              <option value="Ga68">Ga-68</option>
+              <option value="F18">F-18</option>
+              <option value="I131">I-131</option>
+              <option value="Lu177">Lu-177</option>
+            </select>
+          </div>
+          <div class="hl-card">
+            <div class="hl-title">T½</div>
+            <div class="hl-value" id="hl_display">—</div>
+          </div>
         </div>
       </div>
-    </div>
-    <button id="rt_save_btn" class="btn" disabled onclick="handlers.saveRealtime()">Lưu kết quả</button>
 
-    <details class="formula-box">
-      <summary>ⓘ Công thức áp dụng</summary>
-      <div class="formula">A(t) = A₀ × exp(−λ · Δt)</div>
-    </details>
-  </div>
+      <!-- ── Tabs (New Floating Navigation Bar) ────────── -->
+      <nav class="nav-bar" id="tabBar">
+        <button class="nav-item active" data-tab="decay">
+          <svg
+            class="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M16 17h6v-6" />
+            <path d="m22 17-8.5-8.5-5 5L2 7" />
+          </svg>
+          <span class="label">Phân rã</span>
+        </button>
+        <button class="nav-item" data-tab="activity">
+          <svg
+            class="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"
+            />
+          </svg>
+          <span class="label">Hoạt độ</span>
+        </button>
+        <button class="nav-item" data-tab="tools">
+          <svg
+            class="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"
+            />
+            <path d="M6.453 15h11.094" />
+            <path d="M8.5 2h7" />
+          </svg>
+          <span class="label">Công cụ</span>
+        </button>
+      </nav>
 
-  <!-- Reverse -->
-  <div class="panel">
-    <div class="panel-title">Tính hoạt độ cần chuẩn bị</div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Hoạt độ A(t)</label>
-        <input type="text" inputmode="decimal" id="rv_target" placeholder="20" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.reverse()" onblur="handlers.normalizeDot(this)">
+      <div class="tab-panels">
+        <!-- ═══════════ TAB 1 — PHÂN RÃ ════════════════════ -->
+        <section class="tab-content active" id="decay">
+          <div class="panel">
+            <div class="panel-title">
+              Tính hoạt độ phân rã <span id="iso-label-decay">Tc-99m</span>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Hoạt độ (A₀)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="d_a0"
+                  placeholder="1000"
+                  maxlength="14"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this);
+                    handlers.decay();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Đơn vị</label>
+                <select id="d_unit" onchange="handlers.decay()">
+                  <option value="mCi">mCi</option>
+                  <option value="MBq">MBq</option>
+                  <option value="GBq">GBq</option>
+                  <option value="uCi">µCi</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Thời gian (t)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="d_time"
+                  placeholder="0"
+                  maxlength="11"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this, 6, 4);
+                    handlers.decay();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Đơn vị</label>
+                <select id="d_time_unit" onchange="handlers.decay()">
+                  <option value="min">phút</option>
+                  <option value="hr">giờ</option>
+                  <option value="day">ngày</option>
+                </select>
+              </div>
+            </div>
+
+            <hr class="panel-divider" />
+            <div class="result-grid">
+              <div class="result-card">
+                <div class="result-label">−5%</div>
+                <div class="result-value minus" id="at_minus">—</div>
+                <div class="result-unit" id="at_minus_u">mCi</div>
+              </div>
+              <div class="result-card main">
+                <div class="result-label" style="text-transform: none">
+                  A(t)
+                </div>
+                <div class="result-value big" id="at_main">—</div>
+                <div class="result-unit" id="at_main_u">mCi</div>
+              </div>
+              <div class="result-card">
+                <div class="result-label">+5%</div>
+                <div class="result-value plus" id="at_plus">—</div>
+                <div class="result-unit" id="at_plus_u">mCi</div>
+              </div>
+            </div>
+
+            <div id="d_info_panel" class="hidden">
+              <div class="info-rows">
+                <div class="info-row">
+                  <span class="ik">Hoạt độ còn lại</span
+                  ><span class="iv green" id="d_pct">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="ik">Số chu kỳ bán rã đã qua</span
+                  ><span class="iv" id="d_hl_n">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="ik">Hoạt độ đã phân rã</span
+                  ><span class="iv orange" id="d_decayed">—</span>
+                </div>
+              </div>
+              <button class="btn" onclick="handlers.saveDecay()">
+                Lưu kết quả
+              </button>
+            </div>
+
+            <details class="formula-box">
+              <summary>ⓘ Công thức áp dụng</summary>
+              <div class="formula">A(t) = A₀ × exp(−ln2 · t / T½)</div>
+            </details>
+          </div>
+
+          <!-- Quick table -->
+          <div class="panel quick-table">
+            <div class="panel-title">
+              Bảng phân rã nhanh <span id="qt_iso_label">Tc-99m</span>
+            </div>
+            <div class="qt-a0-header-wrap">
+              <div class="qt-a0-header hidden" id="qt_a0_header"></div>
+            </div>
+            <div class="qt-head">
+              <div>Thời gian</div>
+              <div>A(t)</div>
+              <div>%</div>
+              <div>Tiến trình</div>
+            </div>
+            <div id="qt_rows">
+              <div class="empty-state">Nhập A₀ để xem bảng phân rã</div>
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="panel chart-panel">
+            <div class="panel-title">Đồ thị phân rã</div>
+            <canvas id="decayChart" class="decay-chart" height="160"></canvas>
+          </div>
+
+          <!-- History -->
+          <div class="history-panel" id="historyPanel">
+            <button class="history-toggle" onclick="handlers.toggleHistory()">
+              <span>Lịch sử gần đây</span>
+              <span class="history-chevron" id="histChev">+</span>
+            </button>
+            <div class="history-content" id="historyContent">
+              <div class="history-content-inner">
+                <div class="flex-end">
+                  <button
+                    class="btn btn-sm"
+                    onclick="
+                      if (confirm('Xóa toàn bộ lịch sử?'))
+                        handlers.clearRecent();
+                    "
+                  >
+                    Xóa tất cả
+                  </button>
+                </div>
+                <div id="recentList">
+                  <div class="empty-state">Chưa có kết quả nào</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 2 — HOẠT ĐỘ ════════════════════ -->
+        <section class="tab-content" id="activity">
+          <!-- Realtime -->
+          <div class="panel">
+            <div class="panel-title">
+              Hoạt độ theo thời gian thực <span id="iso-label-rt">Tc-99m</span>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Hoạt độ (A₀)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="rt_a0"
+                  placeholder="1000"
+                  maxlength="14"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this);
+                    handlers.realtime();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Đơn vị</label>
+                <select id="rt_unit" onchange="handlers.realtime()">
+                  <option value="mCi">mCi</option>
+                  <option value="MBq">MBq</option>
+                  <option value="GBq">GBq</option>
+                  <option value="uCi">µCi</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Thời gian (t₀)</label>
+                <div class="time-wrap">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    id="rt_start"
+                    placeholder="08:00"
+                    maxlength="5"
+                    class="time-field"
+                    onfocus="this.select()"
+                    oninput="handlers.sanitizeTime(this, event)"
+                    onblur="handlers.timeBlur(this, handlers.realtime)"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label>Thời gian (t)</label>
+                <div class="time-wrap">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    id="rt_end"
+                    placeholder="11:00"
+                    maxlength="5"
+                    class="time-field"
+                    onfocus="this.select()"
+                    oninput="handlers.sanitizeTime(this, event)"
+                    onblur="handlers.timeBlur(this, handlers.realtime)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <hr class="panel-divider" />
+            <div id="rt_results" style="opacity: 0.3" class="rt-results-panel">
+              <div class="rt-layout">
+                <div class="rt-boxes">
+                  <div class="rt-box">
+                    <span class="rt-box-label">Chênh lệch thời gian (Δt)</span>
+                    <span class="rt-box-value" id="rt_delta">—</span>
+                  </div>
+                  <div class="rt-box">
+                    <span class="rt-box-label"
+                      >A(t)
+                      <span class="text-muted-xs" id="rt_unit_lbl"
+                        >mCi</span
+                      ></span
+                    >
+                    <span class="rt-box-value result-at" id="rt_result">—</span>
+                  </div>
+                  <div class="rt-box">
+                    <span class="rt-box-label">Còn lại</span>
+                    <span class="rt-box-value" id="rt_pct">—</span>
+                  </div>
+                </div>
+                <div class="arc-wrap">
+                  <canvas id="rtArc" width="88" height="88"></canvas>
+                  <div class="arc-label">Còn lại</div>
+                </div>
+              </div>
+            </div>
+            <button
+              id="rt_save_btn"
+              class="btn"
+              disabled
+              onclick="handlers.saveRealtime()"
+            >
+              Lưu kết quả
+            </button>
+
+            <details class="formula-box">
+              <summary>ⓘ Công thức áp dụng</summary>
+              <div class="formula">A(t) = A₀ × exp(−λ · Δt)</div>
+            </details>
+          </div>
+
+          <!-- Reverse -->
+          <div class="panel">
+            <div class="panel-title">Tính hoạt độ cần chuẩn bị</div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Hoạt độ A(t)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="rv_target"
+                  placeholder="20"
+                  maxlength="14"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this);
+                    handlers.reverse();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Đơn vị</label>
+                <select id="rv_unit" onchange="handlers.reverse()">
+                  <option value="mCi">mCi</option>
+                  <option value="MBq">MBq</option>
+                  <option value="GBq">GBq</option>
+                  <option value="uCi">µCi</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Thời gian (t₀)</label>
+                <div class="time-wrap">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    id="rv_start"
+                    placeholder="07:30"
+                    maxlength="5"
+                    class="time-field"
+                    onfocus="this.select()"
+                    oninput="handlers.sanitizeTime(this, event)"
+                    onblur="handlers.timeBlur(this, handlers.reverse)"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label>Thời gian (t)</label>
+                <div class="time-wrap">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    id="rv_end"
+                    placeholder="10:00"
+                    maxlength="5"
+                    class="time-field"
+                    onfocus="this.select()"
+                    oninput="handlers.sanitizeTime(this, event)"
+                    onblur="handlers.timeBlur(this, handlers.reverse)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <hr class="panel-divider" />
+            <div class="result-grid grid-rv mb-0">
+              <div class="result-card">
+                <div class="result-label">Δt</div>
+                <div class="result-value val-rv" id="rv_delta">—</div>
+              </div>
+              <div class="result-card main">
+                <div class="result-label">Cần chuẩn bị (A₀)</div>
+                <div class="result-value big" id="rv_result">—</div>
+              </div>
+            </div>
+
+            <details class="formula-box">
+              <summary>ⓘ Công thức áp dụng</summary>
+              <div class="formula">A₀ = A(t) × exp(+λ · Δt)</div>
+            </details>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 3 — CÔNG CỤ ════════════════════ -->
+        <section class="tab-content" id="tools">
+          <div class="panel">
+            <div class="panel-title">
+              Kiểm tra chu kỳ bán rã <span id="iso-label-hl">Tc-99m</span>
+            </div>
+            <div class="grid-2 mb-10">
+              <div class="field">
+                <label>Hoạt độ (A₀)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="h_a0"
+                  placeholder="1000"
+                  maxlength="14"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this);
+                    handlers.halflife();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Hoạt độ A(t)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="h_at"
+                  placeholder="1000"
+                  maxlength="14"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this);
+                    handlers.halflife();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>Thời gian (t)</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  id="h_t"
+                  placeholder="30"
+                  maxlength="11"
+                  onkeydown="handlers.commaKey(this, event)"
+                  oninput="
+                    handlers.sanitizeActivity(this, 6, 4);
+                    handlers.halflife();
+                  "
+                  onblur="handlers.normalizeDot(this)"
+                />
+              </div>
+              <div class="field">
+                <label>Đơn vị</label>
+                <select id="h_t_unit" onchange="handlers.halflife()">
+                  <option value="min">phút</option>
+                  <option value="hr">giờ</option>
+                  <option value="day">ngày</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="qc-bar-wrap">
+              <div class="qc-bar"></div>
+              <div class="qc-marker" id="h_qc_marker"></div>
+            </div>
+            <div class="qc-label-row">
+              <span>−5%</span><span>−2%</span><span>0</span><span>+2%</span
+              ><span>+5%</span>
+            </div>
+            <div class="result-grid grid-hl mb-0">
+              <div class="result-card main">
+                <div class="result-label">T½ đo được</div>
+                <div class="result-value big val-lg" id="h_t12_smart">—</div>
+                <div class="result-unit" id="h_t12_smart_unit">—</div>
+              </div>
+              <div class="result-card">
+                <div class="result-label">T½ đo được</div>
+                <div class="result-value val-md" id="h_t12_min">—</div>
+                <div class="result-unit">phút</div>
+              </div>
+            </div>
+
+            <div id="h_info" class="hidden">
+              <div class="info-rows">
+                <div class="info-row">
+                  <span class="ik">T½ lý thuyết</span
+                  ><span class="iv" id="h_theory">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="ik">T½ đo được</span
+                  ><span class="iv" id="h_actual">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="ik">Độ lệch</span
+                  ><span class="iv" id="h_diff">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="ik">Kết quả QC</span
+                  ><span class="iv" id="h_eval">—</span>
+                </div>
+              </div>
+              <button class="btn" onclick="handlers.saveHalflife()">
+                Lưu kết quả
+              </button>
+            </div>
+
+            <details class="formula-box">
+              <summary>ⓘ Công thức áp dụng</summary>
+              <div class="formula">T½ = (ln2 × t) / ln(A₀ / A(t))</div>
+            </details>
+          </div>
+        </section>
       </div>
-      <div class="field">
-        <label>Đơn vị</label>
-        <select id="rv_unit" onchange="handlers.reverse()">
-          <option value="mCi">mCi</option>
-          <option value="MBq">MBq</option>
-          <option value="GBq">GBq</option>
-          <option value="uCi">µCi</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Thời điểm thực hiện</label>
-        <div class="time-wrap">
-          <input type="text" inputmode="numeric" id="rv_start" placeholder="07:30" maxlength="5"
-                 class="time-field"
-                 onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.reverse)">
+      <!-- /tab-panels -->
+
+      <!-- PWA Install Banner -->
+      <div id="pwa-install-banner" class="pwa-banner">
+        <div class="pwa-banner-icon">⚛︎</div>
+        <div class="pwa-banner-text">
+          <strong>Cài đặt NuCal</strong>
+          <span>Dùng offline, không cần mạng</span>
         </div>
-      </div>
-      <div class="field">
-        <label>Thời điểm sử dụng</label>
-        <div class="time-wrap">
-          <input type="text" inputmode="numeric" id="rv_end" placeholder="10:00" maxlength="5"
-                 class="time-field"
-                 onfocus="this.select()"
-                 oninput="handlers.sanitizeTime(this, event)" onblur="handlers.timeBlur(this, handlers.reverse)">
-        </div>
+        <button id="pwa-install-btn" class="pwa-btn-install">Cài đặt</button>
+        <button id="pwa-dismiss-btn" class="pwa-btn-dismiss" aria-label="Đóng">
+          ✕
+        </button>
       </div>
     </div>
+    <!-- /app -->
 
-    <hr class="panel-divider">
-    <div class="result-grid grid-rv mb-0">
-      <div class="result-card">
-        <div class="result-label">Δt</div>
-        <div class="result-value val-rv" id="rv_delta">—</div>
-      </div>
-      <div class="result-card main">
-        <div class="result-label">Cần chuẩn bị (A₀)</div>
-        <div class="result-value big" id="rv_result">—</div>
-      </div>
-    </div>
-
-    <details class="formula-box">
-      <summary>ⓘ Công thức áp dụng</summary>
-      <div class="formula">A₀ = A(t) × exp(+λ · Δt)</div>
-    </details>
-  </div>
-</section>
-
-<!-- ═══════════ TAB 3 — CÔNG CỤ ════════════════════ -->
-<section class="tab-content" id="tools">
-  <div class="panel">
-    <div class="panel-title">Kiểm tra chu kỳ bán rã <span id="iso-label-hl">Tc-99m</span></div>
-    <div class="grid-2 mb-10">
-      <div class="field">
-        <label>Hoạt độ (A₀)</label>
-        <input type="text" inputmode="decimal" id="h_a0" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.halflife()" onblur="handlers.normalizeDot(this)">
-      </div>
-      <div class="field">
-        <label>Hoạt độ A(t)</label>
-        <input type="text" inputmode="decimal" id="h_at" placeholder="1000" maxlength="14" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this);handlers.halflife()" onblur="handlers.normalizeDot(this)">
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Thời gian</label>
-        <input type="text" inputmode="decimal" id="h_t" placeholder="30" maxlength="11" onkeydown="handlers.commaKey(this,event)" oninput="handlers.sanitizeActivity(this,6,4);handlers.halflife()" onblur="handlers.normalizeDot(this)">
-      </div>
-      <div class="field">
-        <label>Đơn vị</label>
-        <select id="h_t_unit" onchange="handlers.halflife()">
-          <option value="min">phút</option>
-          <option value="hr">giờ</option>
-          <option value="day">ngày</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="qc-bar-wrap">
-      <div class="qc-bar"></div>
-      <div class="qc-marker" id="h_qc_marker"></div>
-    </div>
-    <div class="qc-label-row"><span>−5%</span><span>−2%</span><span>0</span><span>+2%</span><span>+5%</span></div>
-    <div class="result-grid grid-hl mb-0">
-      <div class="result-card main">
-        <div class="result-label">T½ đo được</div>
-        <div class="result-value big val-lg" id="h_t12_smart">—</div>
-        <div class="result-unit" id="h_t12_smart_unit">—</div>
-      </div>
-      <div class="result-card">
-        <div class="result-label">Giá trị gốc</div>
-        <div class="result-value val-md" id="h_t12_min">—</div>
-        <div class="result-unit">phút</div>
-      </div>
-    </div>
-
-    <div id="h_info" class="hidden">
-      <div class="info-rows">
-        <div class="info-row"><span class="ik">T½ lý thuyết</span><span class="iv" id="h_theory">—</span></div>
-        <div class="info-row"><span class="ik">T½ đo được</span><span class="iv" id="h_actual">—</span></div>
-        <div class="info-row"><span class="ik">Độ lệch</span><span class="iv" id="h_diff">—</span></div>
-        <div class="info-row"><span class="ik">Kết quả QC</span><span class="iv" id="h_eval">—</span></div>
-      </div>
-      <button class="btn" onclick="handlers.saveHalflife()">Lưu kết quả</button>
-    </div>
-
-    <details class="formula-box">
-      <summary>ⓘ Công thức áp dụng</summary>
-      <div class="formula">T½ = (ln2 × t) / ln(A₀ / A(t))</div>
-    </details>
-  </div>
-</section>
-
-</div><!-- /tab-panels -->
-
-<!-- PWA Install Banner -->
-<div id="pwa-install-banner" class="pwa-banner">
-  <div class="pwa-banner-icon">⚛︎</div>
-  <div class="pwa-banner-text">
-    <strong>Cài đặt NuCal</strong>
-    <span>Dùng offline, không cần mạng</span>
-  </div>
-  <button id="pwa-install-btn" class="pwa-btn-install">Cài đặt</button>
-  <button id="pwa-dismiss-btn" class="pwa-btn-dismiss" aria-label="Đóng">✕</button>
-</div>
-</div><!-- /app -->
-
-<script>
-/* ═══════════════════════════════════════════════════════════════
+    <script>
+      /* ═══════════════════════════════════════════════════════════════
    CONSTANTS
    ═══════════════════════════════════════════════════════════════ */
 
-/** @type {Object.<string, {name:string, halfLife:number, color:string}>} */
-const ISOTOPES = Object.freeze({
-  Tc99m: { name: 'Tc-99m', halfLife: 360.492, color: '#6cb6ff' },
-  Ga68:  { name: 'Ga-68',  halfLife: 67.71,   color: '#f472b6' },
-  F18:   { name: 'F-18',   halfLife: 109.771, color: '#ffb84d' },
-  I131:  { name: 'I-131',  halfLife: 11549.808, color: '#59d98e' },
-  Lu177: { name: 'Lu-177', halfLife: 9572.40,  color: '#c084fc' },
-});
+      /** @type {Object.<string, {name:string, halfLife:number, color:string}>} */
+      const ISOTOPES = Object.freeze({
+        Tc99m: { name: "Tc-99m", halfLife: 360.492, color: "#6cb6ff" },
+        Ga68: { name: "Ga-68", halfLife: 67.71, color: "#f472b6" },
+        F18: { name: "F-18", halfLife: 109.771, color: "#ffb84d" },
+        I131: { name: "I-131", halfLife: 11549.808, color: "#59d98e" },
+        Lu177: { name: "Lu-177", halfLife: 9572.4, color: "#c084fc" },
+      });
 
-/** @type {Object.<string, number>} */
-const UNIT_FACTORS = Object.freeze({ mCi: 1, MBq: 37, GBq: 0.037, uCi: 1000 });
+      /** @type {Object.<string, number>} */
+      const UNIT_FACTORS = Object.freeze({
+        mCi: 1,
+        MBq: 37,
+        GBq: 0.037,
+        uCi: 1000,
+      });
 
-/** @type {Object.<string, string>} */
-const UNIT_LABELS = Object.freeze({ mCi: 'mCi', MBq: 'MBq', GBq: 'GBq', uCi: 'µCi' });
+      /** @type {Object.<string, string>} */
+      const UNIT_LABELS = Object.freeze({
+        mCi: "mCi",
+        MBq: "MBq",
+        GBq: "GBq",
+        uCi: "µCi",
+      });
 
-/** @type {string} */
-const STORAGE_KEY = 'nm_v7';
+      /** @type {string} */
+      const STORAGE_KEY = "nm_v7";
 
-/** @type {number} */
-const MAX_RECENT = 20;
+      /** @type {number} */
+      const MAX_RECENT = 20;
 
-/** @type {Object.<string, {l:string, t:number}[]>} */
-const PRESET_CACHE = {};
+      /** @type {Object.<string, {l:string, t:number}[]>} */
+      const PRESET_CACHE = {};
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════════════════════ */
 
-/** @type {Array} */
-let recentCalcs = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      /** @type {Array} */
+      let recentCalcs = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
-/** @type {{a0: number, at: number, t: number, t12: number}|null} */
-let halfLifeState = null;
+      /** @type {{a0: number, at: number, t: number, t12: number}|null} */
+      let halfLifeState = null;
 
-/** @type {number|null} */
-let resizeTimer = null;
+      /** @type {number|null} */
+      let resizeTimer = null;
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    DOM REFERENCES
    ═══════════════════════════════════════════════════════════════ */
 
-const DOM = {
-  isotope: document.getElementById('isotope'),
-  hlDisplay: document.getElementById('hl_display'),
+      const DOM = {
+        isotope: document.getElementById("isotope"),
+        hlDisplay: document.getElementById("hl_display"),
 
-  // Tab 1 — Decay
-  dA0: document.getElementById('d_a0'),
-  dUnit: document.getElementById('d_unit'),
-  dTime: document.getElementById('d_time'),
-  dTimeUnit: document.getElementById('d_time_unit'),
-  atMain: document.getElementById('at_main'),
-  atMinus: document.getElementById('at_minus'),
-  atPlus: document.getElementById('at_plus'),
-  atMainU: document.getElementById('at_main_u'),
-  atMinusU: document.getElementById('at_minus_u'),
-  atPlusU: document.getElementById('at_plus_u'),
-  dInfoPanel: document.getElementById('d_info_panel'),
-  dPct: document.getElementById('d_pct'),
-  dHlN: document.getElementById('d_hl_n'),
-  dDecayed: document.getElementById('d_decayed'),
-  isoLabelDecay: document.getElementById('iso-label-decay'),
-  qtRows: document.getElementById('qt_rows'),
-  qtA0Header: document.getElementById('qt_a0_header'),
-  qtIsoLabel: document.getElementById('qt_iso_label'),
-  decayChart: document.getElementById('decayChart'),
+        // Tab 1 — Decay
+        dA0: document.getElementById("d_a0"),
+        dUnit: document.getElementById("d_unit"),
+        dTime: document.getElementById("d_time"),
+        dTimeUnit: document.getElementById("d_time_unit"),
+        atMain: document.getElementById("at_main"),
+        atMinus: document.getElementById("at_minus"),
+        atPlus: document.getElementById("at_plus"),
+        atMainU: document.getElementById("at_main_u"),
+        atMinusU: document.getElementById("at_minus_u"),
+        atPlusU: document.getElementById("at_plus_u"),
+        dInfoPanel: document.getElementById("d_info_panel"),
+        dPct: document.getElementById("d_pct"),
+        dHlN: document.getElementById("d_hl_n"),
+        dDecayed: document.getElementById("d_decayed"),
+        isoLabelDecay: document.getElementById("iso-label-decay"),
+        qtRows: document.getElementById("qt_rows"),
+        qtA0Header: document.getElementById("qt_a0_header"),
+        qtIsoLabel: document.getElementById("qt_iso_label"),
+        decayChart: document.getElementById("decayChart"),
 
-  // Tab 2 — Activity
-  rtA0: document.getElementById('rt_a0'),
-  rtUnit: document.getElementById('rt_unit'),
-  rtStart: document.getElementById('rt_start'),
-  rtEnd: document.getElementById('rt_end'),
-  rtResults: document.getElementById('rt_results'),
-  rtDelta: document.getElementById('rt_delta'),
-  rtResult: document.getElementById('rt_result'),
-  rtUnitLbl: document.getElementById('rt_unit_lbl'),
-  rtPct: document.getElementById('rt_pct'),
-  rtArc: document.getElementById('rtArc'),
-  rtSaveBtn: document.getElementById('rt_save_btn'),
-  isoLabelRt: document.getElementById('iso-label-rt'),
+        // Tab 2 — Activity
+        rtA0: document.getElementById("rt_a0"),
+        rtUnit: document.getElementById("rt_unit"),
+        rtStart: document.getElementById("rt_start"),
+        rtEnd: document.getElementById("rt_end"),
+        rtResults: document.getElementById("rt_results"),
+        rtDelta: document.getElementById("rt_delta"),
+        rtResult: document.getElementById("rt_result"),
+        rtUnitLbl: document.getElementById("rt_unit_lbl"),
+        rtPct: document.getElementById("rt_pct"),
+        rtArc: document.getElementById("rtArc"),
+        rtSaveBtn: document.getElementById("rt_save_btn"),
+        isoLabelRt: document.getElementById("iso-label-rt"),
 
-  rvTarget: document.getElementById('rv_target'),
-  rvUnit: document.getElementById('rv_unit'),
-  rvStart: document.getElementById('rv_start'),
-  rvEnd: document.getElementById('rv_end'),
-  rvResult: document.getElementById('rv_result'),
-  rvDelta: document.getElementById('rv_delta'),
+        rvTarget: document.getElementById("rv_target"),
+        rvUnit: document.getElementById("rv_unit"),
+        rvStart: document.getElementById("rv_start"),
+        rvEnd: document.getElementById("rv_end"),
+        rvResult: document.getElementById("rv_result"),
+        rvDelta: document.getElementById("rv_delta"),
 
-  // Tab 3 — Tools
-  hA0: document.getElementById('h_a0'),
-  hAt: document.getElementById('h_at'),
-  hT: document.getElementById('h_t'),
-  hTUnit: document.getElementById('h_t_unit'),
-  hT12Smart: document.getElementById('h_t12_smart'),
-  hT12SmartUnit: document.getElementById('h_t12_smart_unit'),
-  hT12Min: document.getElementById('h_t12_min'),
-  hInfo: document.getElementById('h_info'),
-  hTheory: document.getElementById('h_theory'),
-  hActual: document.getElementById('h_actual'),
-  hDiff: document.getElementById('h_diff'),
-  hEval: document.getElementById('h_eval'),
-  hQcMarker: document.getElementById('h_qc_marker'),
-  hQcBar: document.querySelector('.qc-bar'),
-  isoLabelHl: document.getElementById('iso-label-hl'),
+        // Tab 3 — Tools
+        hA0: document.getElementById("h_a0"),
+        hAt: document.getElementById("h_at"),
+        hT: document.getElementById("h_t"),
+        hTUnit: document.getElementById("h_t_unit"),
+        hT12Smart: document.getElementById("h_t12_smart"),
+        hT12SmartUnit: document.getElementById("h_t12_smart_unit"),
+        hT12Min: document.getElementById("h_t12_min"),
+        hInfo: document.getElementById("h_info"),
+        hTheory: document.getElementById("h_theory"),
+        hActual: document.getElementById("h_actual"),
+        hDiff: document.getElementById("h_diff"),
+        hEval: document.getElementById("h_eval"),
+        hQcMarker: document.getElementById("h_qc_marker"),
+        hQcBar: document.querySelector(".qc-bar"),
+        isoLabelHl: document.getElementById("iso-label-hl"),
 
-  // History
-  historyPanel: document.getElementById('historyPanel'),
-  historyContent: document.getElementById('historyContent'),
-  histChev: document.getElementById('histChev'),
-  recentList: document.getElementById('recentList'),
+        // History
+        historyPanel: document.getElementById("historyPanel"),
+        historyContent: document.getElementById("historyContent"),
+        histChev: document.getElementById("histChev"),
+        recentList: document.getElementById("recentList"),
 
-  // PWA
-  pwaBanner: document.getElementById('pwa-install-banner'),
-  pwaInstallBtn: document.getElementById('pwa-install-btn'),
-  pwaDismissBtn: document.getElementById('pwa-dismiss-btn'),
+        // PWA
+        pwaBanner: document.getElementById("pwa-install-banner"),
+        pwaInstallBtn: document.getElementById("pwa-install-btn"),
+        pwaDismissBtn: document.getElementById("pwa-dismiss-btn"),
 
-  // Tabs (new nav)
-  tabBar: document.getElementById('tabBar'),
-  navItems: document.querySelectorAll('.nav-item'),
-  tabContents: document.querySelectorAll('.tab-content'),
-};
+        // Tabs (new nav)
+        tabBar: document.getElementById("tabBar"),
+        navItems: document.querySelectorAll(".nav-item"),
+        tabContents: document.querySelectorAll(".tab-content"),
+      };
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    UTILITY FUNCTIONS
    ═══════════════════════════════════════════════════════════════ */
 
-/** @returns {typeof ISOTOPES[keyof typeof ISOTOPES]} */
-function getIsotope() { return ISOTOPES[DOM.isotope.value]; }
+      /** @returns {typeof ISOTOPES[keyof typeof ISOTOPES]} */
+      function getIsotope() {
+        return ISOTOPES[DOM.isotope.value];
+      }
 
-/** @returns {number} Half-life in minutes */
-function getHalfLife() { return getIsotope().halfLife; }
+      /** @returns {number} Half-life in minutes */
+      function getHalfLife() {
+        return getIsotope().halfLife;
+      }
 
-/** @param {string} unit @returns {number} */
-function getUnitFactor(unit) { return UNIT_FACTORS[unit] || 1; }
+      /** @param {string} unit @returns {number} */
+      function getUnitFactor(unit) {
+        return UNIT_FACTORS[unit] || 1;
+      }
 
-/** @param {string} unit @returns {string} */
-function getUnitLabel(unit) { return UNIT_LABELS[unit] || unit; }
+      /** @param {string} unit @returns {string} */
+      function getUnitLabel(unit) {
+        return UNIT_LABELS[unit] || unit;
+      }
 
-/**
- * @param {number} raw Value in mCi (raw)
- * @param {string} unit Display unit
- * @returns {number} Value in display unit
- */
-function toDisplay(raw, unit) { return raw * getUnitFactor(unit); }
+      /**
+       * @param {number} raw Value in mCi (raw)
+       * @param {string} unit Display unit
+       * @returns {number} Value in display unit
+       */
+      function toDisplay(raw, unit) {
+        return raw * getUnitFactor(unit);
+      }
 
-/**
- * @param {number} raw Value in mCi
- * @param {string} unit Display unit
- * @returns {string} Formatted string with unit
- */
-function formatDisplay(raw, unit) {
-  return fmt(toDisplay(raw, unit)) + ' ' + getUnitLabel(unit);
-}
+      /**
+       * @param {number} raw Value in mCi
+       * @param {string} unit Display unit
+       * @returns {string} Formatted string with unit
+       */
+      function formatDisplay(raw, unit) {
+        return fmt(toDisplay(raw, unit)) + " " + getUnitLabel(unit);
+      }
 
-/** @param {number} v @returns {string} */
-function fmt(v) {
-  if (!isFinite(v) || v == null) return '—';
-  if (v >= 10000) return v.toFixed(0);
-  if (v >= 1000) return v.toFixed(1);
-  if (v >= 100) return v.toFixed(2);
-  if (v >= 10) return v.toFixed(3);
-  return v.toFixed(4);
-}
+      /** @param {number} v @returns {string} */
+      function fmt(v) {
+        if (!isFinite(v) || v == null) return "—";
+        if (v >= 10000) return v.toFixed(0);
+        if (v >= 1000) return v.toFixed(1);
+        if (v >= 100) return v.toFixed(2);
+        if (v >= 10) return v.toFixed(3);
+        return v.toFixed(4);
+      }
 
-/**
- * @param {number} a0 Raw activity in mCi
- * @param {number} tMin Time in minutes
- * @returns {number} Decayed activity in mCi
- */
-function decay(a0, tMin) {
-  return a0 * Math.exp(-Math.LN2 * tMin / getHalfLife());
-}
+      /**
+       * @param {number} a0 Raw activity in mCi
+       * @param {number} tMin Time in minutes
+       * @returns {number} Decayed activity in mCi
+       */
+      function decay(a0, tMin) {
+        return a0 * Math.exp((-Math.LN2 * tMin) / getHalfLife());
+      }
 
-/**
- * @param {string|number} val
- * @param {string} unit 'min' | 'hr' | 'day'
- * @returns {number} Minutes
- */
-function toMinutes(val, unit) {
-  const v = parseFloat(val);
-  if (!isFinite(v) || v < 0) return 0;
-  if (unit === 'hr') return v * 60;
-  if (unit === 'day') return v * 1440;
-  return v;
-}
+      /**
+       * @param {string|number} val
+       * @param {string} unit 'min' | 'hr' | 'day'
+       * @returns {number} Minutes
+       */
+      function toMinutes(val, unit) {
+        const v = parseFloat(val);
+        if (!isFinite(v) || v < 0) return 0;
+        if (unit === "hr") return v * 60;
+        if (unit === "day") return v * 1440;
+        return v;
+      }
 
-/** @param {number} m Minutes @returns {string} */
-function formatDuration(m) {
-  if (!isFinite(m) || m < 0) return '—';
-  m = Math.round(m);
-  if (m < 60) return m + ' phút';
-  const h = Math.floor(m / 60), r = m % 60;
-  if (h < 24) return r > 0 ? h + 'h ' + r + 'ph' : h + 'h';
-  const d = Math.floor(h / 24), hr = h % 24;
-  return hr > 0 ? d + 'n ' + hr + 'h' : d + ' ngày';
-}
+      /** @param {number} m Minutes @returns {string} */
+      function formatDuration(m) {
+        if (!isFinite(m) || m < 0) return "—";
+        m = Math.round(m);
+        if (m < 60) return m + " phút";
+        const h = Math.floor(m / 60),
+          r = m % 60;
+        if (h < 24) return r > 0 ? h + "h " + r + "ph" : h + "h";
+        const d = Math.floor(h / 24),
+          hr = h % 24;
+        return hr > 0 ? d + "n " + hr + "h" : d + " ngày";
+      }
 
-/** @param {number} hl Half-life in minutes @returns {string} */
-function formatHalfLife(hl) {
-  if (hl < 120) return hl.toFixed(1) + ' phút';
-  if (hl < 2880) return (hl / 60).toFixed(2) + ' giờ';
-  return (hl / 1440).toFixed(2) + ' ngày';
-}
+      /** @param {number} hl Half-life in minutes @returns {string} */
+      function formatHalfLife(hl) {
+        if (hl < 120) return hl.toFixed(1) + " phút";
+        if (hl < 2880) return (hl / 60).toFixed(2) + " giờ";
+        return (hl / 1440).toFixed(2) + " ngày";
+      }
 
-/** @returns {{date:string, time:string}} */
-function getTimestamp() {
-  const d = new Date();
-  return {
-    date: String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'),
-    time: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'),
-  };
-}
+      /** @returns {{date:string, time:string}} */
+      function getTimestamp() {
+        const d = new Date();
+        return {
+          date:
+            String(d.getDate()).padStart(2, "0") +
+            "/" +
+            String(d.getMonth() + 1).padStart(2, "0"),
+          time:
+            String(d.getHours()).padStart(2, "0") +
+            ":" +
+            String(d.getMinutes()).padStart(2, "0"),
+        };
+      }
 
-/** @param {number} hl Half-life @returns {{l:string, t:number}[]} */
-function getPresets(hl) {
-  if (PRESET_CACHE[hl]) return PRESET_CACHE[hl];
-  let presets;
-  if (hl <= 360) {
-    presets = [
-      { l: '15 phút', t: 15 }, { l: '30 phút', t: 30 },
-      { l: '1 giờ', t: 60 }, { l: '2 giờ', t: 120 },
-      { l: '3 giờ', t: 180 }, { l: '4 giờ', t: 240 },
-      { l: '6 giờ', t: 360 }, { l: '12 giờ', t: 720 },
-      { l: '18 giờ', t: 1080 }, { l: '24 giờ', t: 1440 },
-    ];
-  } else if (hl <= 2880) {
-    presets = [
-      { l: '1 giờ', t: 60 }, { l: '2 giờ', t: 120 },
-      { l: '4 giờ', t: 240 }, { l: '6 giờ', t: 360 },
-      { l: '12 giờ', t: 720 }, { l: '24 giờ', t: 1440 },
-      { l: '2 ngày', t: 2880 }, { l: '3 ngày', t: 4320 },
-      { l: '5 ngày', t: 7200 }, { l: '7 ngày', t: 10080 },
-    ];
-  } else {
-    presets = [
-      { l: '1 ngày', t: 1440 }, { l: '2 ngày', t: 2880 },
-      { l: '3 ngày', t: 4320 }, { l: '5 ngày', t: 7200 },
-      { l: '7 ngày', t: 10080 }, { l: '10 ngày', t: 14400 },
-      { l: '14 ngày', t: 20160 }, { l: '21 ngày', t: 30240 },
-      { l: '28 ngày', t: 40320 }, { l: '42 ngày', t: 60480 },
-    ];
-  }
-  PRESET_CACHE[hl] = presets;
-  return presets;
-}
+      /** @param {number} hl Half-life @returns {{l:string, t:number}[]} */
+      function getPresets(hl) {
+        if (PRESET_CACHE[hl]) return PRESET_CACHE[hl];
+        let presets;
+        if (hl <= 360) {
+          presets = [
+            { l: "15 phút", t: 15 },
+            { l: "30 phút", t: 30 },
+            { l: "1 giờ", t: 60 },
+            { l: "2 giờ", t: 120 },
+            { l: "3 giờ", t: 180 },
+            { l: "4 giờ", t: 240 },
+            { l: "6 giờ", t: 360 },
+            { l: "12 giờ", t: 720 },
+            { l: "18 giờ", t: 1080 },
+            { l: "24 giờ", t: 1440 },
+          ];
+        } else if (hl <= 2880) {
+          presets = [
+            { l: "1 giờ", t: 60 },
+            { l: "2 giờ", t: 120 },
+            { l: "4 giờ", t: 240 },
+            { l: "6 giờ", t: 360 },
+            { l: "12 giờ", t: 720 },
+            { l: "24 giờ", t: 1440 },
+            { l: "2 ngày", t: 2880 },
+            { l: "3 ngày", t: 4320 },
+            { l: "5 ngày", t: 7200 },
+            { l: "7 ngày", t: 10080 },
+          ];
+        } else {
+          presets = [
+            { l: "1 ngày", t: 1440 },
+            { l: "2 ngày", t: 2880 },
+            { l: "3 ngày", t: 4320 },
+            { l: "5 ngày", t: 7200 },
+            { l: "7 ngày", t: 10080 },
+            { l: "10 ngày", t: 14400 },
+            { l: "14 ngày", t: 20160 },
+            { l: "21 ngày", t: 30240 },
+            { l: "28 ngày", t: 40320 },
+            { l: "42 ngày", t: 60480 },
+          ];
+        }
+        PRESET_CACHE[hl] = presets;
+        return presets;
+      }
 
-/* ── Time Input Helpers ─────────────────────────── */
+      /* ── Time Input Helpers ─────────────────────────── */
 
-/**
- * @param {HTMLInputElement} el
- * @param {Event} e
- */
-function sanitizeTimeInput(el, e) {
-  const isDeleting = e && (
-    e.inputType === 'deleteContentBackward' ||
-    e.inputType === 'deleteContentForward' ||
-    e.inputType === 'deleteByCut'
-  );
+      /**
+       * @param {HTMLInputElement} el
+       * @param {Event} e
+       */
+      function sanitizeTimeInput(el, e) {
+        const isDeleting =
+          e &&
+          (e.inputType === "deleteContentBackward" ||
+            e.inputType === "deleteContentForward" ||
+            e.inputType === "deleteByCut");
 
-  let v = el.value;
-  const digits = v.replace(/\D/g, '').slice(0, 4);
+        let v = el.value;
+        const digits = v.replace(/\D/g, "").slice(0, 4);
 
-  if (isDeleting) {
-    let cleaned = v.replace(/[^0-9:]/g, '');
-    const colonIdx = cleaned.indexOf(':');
-    if (colonIdx !== -1) {
-      cleaned = cleaned.slice(0, colonIdx + 1) + cleaned.slice(colonIdx + 1).replace(/:/g, '');
-    }
-    cleaned = cleaned.slice(0, 5);
-    if (el.value !== cleaned) el.value = cleaned;
-    return;
-  }
+        if (isDeleting) {
+          let cleaned = v.replace(/[^0-9:]/g, "");
+          const colonIdx = cleaned.indexOf(":");
+          if (colonIdx !== -1) {
+            cleaned =
+              cleaned.slice(0, colonIdx + 1) +
+              cleaned.slice(colonIdx + 1).replace(/:/g, "");
+          }
+          cleaned = cleaned.slice(0, 5);
+          if (el.value !== cleaned) el.value = cleaned;
+          return;
+        }
 
-  const built = digits.length >= 3
-    ? digits.slice(0, 2) + ':' + digits.slice(2)
-    : digits;
-  if (el.value !== built) el.value = built;
-}
+        const built =
+          digits.length >= 3
+            ? digits.slice(0, 2) + ":" + digits.slice(2)
+            : digits;
+        if (el.value !== built) el.value = built;
+      }
 
-/**
- * @param {HTMLInputElement} el
- * @param {Function} triggerFn
- */
-function handleTimeBlur(el, triggerFn) {
-  let raw = el.value.replace(/\D/g, '');
-  if (!raw) {
-    el.classList.remove('input-invalid');
-    triggerFn();
-    return;
-  }
-  raw = raw.slice(0, 4).padStart(4, '0');
-  const h = parseInt(raw.slice(0, 2), 10);
-  const m = parseInt(raw.slice(2, 4), 10);
-  if (h > 23 || m > 59) {
-    el.classList.add('input-invalid');
-    triggerFn();
-    return;
-  }
-  el.classList.remove('input-invalid');
-  el.value = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-  triggerFn();
-}
+      /**
+       * @param {HTMLInputElement} el
+       * @param {Function} triggerFn
+       */
+      function handleTimeBlur(el, triggerFn) {
+        let raw = el.value.replace(/\D/g, "");
+        if (!raw) {
+          el.classList.remove("input-invalid");
+          triggerFn();
+          return;
+        }
+        raw = raw.slice(0, 4).padStart(4, "0");
+        const h = parseInt(raw.slice(0, 2), 10);
+        const m = parseInt(raw.slice(2, 4), 10);
+        if (h > 23 || m > 59) {
+          el.classList.add("input-invalid");
+          triggerFn();
+          return;
+        }
+        el.classList.remove("input-invalid");
+        el.value =
+          String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+        triggerFn();
+      }
 
-/** @param {string} val @param {HTMLInputElement} el @returns {number|null} */
-function parseTime(val, el) {
-  if (el && el.classList.contains('input-invalid')) return null;
-  let s = String(val || '').replace(/\D/g, '');
-  if (!s) return null;
-  s = s.padStart(4, '0');
-  const h = parseInt(s.slice(0, 2), 10);
-  const m = parseInt(s.slice(2, 4), 10);
-  if (h > 23 || m > 59) return null;
-  return h * 60 + m;
-}
+      /** @param {string} val @param {HTMLInputElement} el @returns {number|null} */
+      function parseTime(val, el) {
+        if (el && el.classList.contains("input-invalid")) return null;
+        let s = String(val || "").replace(/\D/g, "");
+        if (!s) return null;
+        s = s.padStart(4, "0");
+        const h = parseInt(s.slice(0, 2), 10);
+        const m = parseInt(s.slice(2, 4), 10);
+        if (h > 23 || m > 59) return null;
+        return h * 60 + m;
+      }
 
-/** @param {string} elId @returns {number|null} */
-function getTimeMins(elId) {
-  const el = document.getElementById(elId);
-  return parseTime(el.value, el);
-}
+      /** @param {string} elId @returns {number|null} */
+      function getTimeMins(elId) {
+        const el = document.getElementById(elId);
+        return parseTime(el.value, el);
+      }
 
-/** @param {number} start @param {number} end @returns {number} */
-function clockDelta(start, end) {
-  let d = end - start;
-  if (d < 0) d += 1440;
-  return d;
-}
+      /** @param {number} start @param {number} end @returns {number} */
+      function clockDelta(start, end) {
+        let d = end - start;
+        if (d < 0) d += 1440;
+        return d;
+      }
 
-/* ── Input Sanitization ─────────────────────────── */
+      /* ── Input Sanitization ─────────────────────────── */
 
-/**
- * @param {HTMLInputElement} el
- * @param {Event} e
- */
-function handleCommaKey(el, e) {
-  if (e.key !== ',') return;
-  e.preventDefault();
-  const start = el.selectionStart, end = el.selectionEnd;
-  const v = el.value;
-  if (v.indexOf('.') !== -1) return;
-  el.value = v.slice(0, start) + '.' + v.slice(end);
-  el.selectionStart = el.selectionEnd = start + 1;
-  el.dispatchEvent(new Event('input'));
-}
+      /**
+       * @param {HTMLInputElement} el
+       * @param {Event} e
+       */
+      function handleCommaKey(el, e) {
+        if (e.key !== ",") return;
+        e.preventDefault();
+        const start = el.selectionStart,
+          end = el.selectionEnd;
+        const v = el.value;
+        if (v.indexOf(".") !== -1) return;
+        el.value = v.slice(0, start) + "." + v.slice(end);
+        el.selectionStart = el.selectionEnd = start + 1;
+        el.dispatchEvent(new Event("input"));
+      }
 
-/**
- * @param {HTMLInputElement} el
- * @param {number} maxInt
- * @param {number} maxDec
- */
-function sanitizeActivityInput(el, maxInt = 9, maxDec = 4) {
-  let v = el.value;
-  const commaCount = (v.match(/,/g) || []).length;
-  if (commaCount === 1) {
-    const afterComma = v.split(',')[1] || '';
-    v = afterComma.length !== 3 ? v.replace(',', '.') : v.replace(/,/g, '');
-  } else {
-    v = v.replace(/,/g, '');
-  }
-  v = v.replace(/[^0-9.]/g, '');
-  const parts = v.split('.');
-  if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
-  let [intPart, decPart] = v.split('.');
-  intPart = (intPart || '').slice(0, maxInt);
-  if (intPart && parseFloat(intPart) > 99999) intPart = '99999';
-  if (decPart !== undefined) {
-    decPart = decPart.slice(0, maxDec);
-    v = intPart + '.' + decPart;
-  } else {
-    v = intPart;
-  }
-  if (v.startsWith('.')) v = '0' + v;
-  el.value = v;
-}
+      /**
+       * @param {HTMLInputElement} el
+       * @param {number} maxInt
+       * @param {number} maxDec
+       */
+      function sanitizeActivityInput(el, maxInt = 9, maxDec = 4) {
+        let v = el.value;
+        const commaCount = (v.match(/,/g) || []).length;
+        if (commaCount === 1) {
+          const afterComma = v.split(",")[1] || "";
+          v =
+            afterComma.length !== 3 ? v.replace(",", ".") : v.replace(/,/g, "");
+        } else {
+          v = v.replace(/,/g, "");
+        }
+        v = v.replace(/[^0-9.]/g, "");
+        const parts = v.split(".");
+        if (parts.length > 2) v = parts[0] + "." + parts.slice(1).join("");
+        let [intPart, decPart] = v.split(".");
+        intPart = (intPart || "").slice(0, maxInt);
+        if (intPart && parseFloat(intPart) > 99999) intPart = "99999";
+        if (decPart !== undefined) {
+          decPart = decPart.slice(0, maxDec);
+          v = intPart + "." + decPart;
+        } else {
+          v = intPart;
+        }
+        if (v.startsWith(".")) v = "0" + v;
+        el.value = v;
+      }
 
-/** @param {HTMLInputElement} el */
-function normalizeTrailingDot(el) {
-  if (el.value.endsWith('.')) el.value = el.value.slice(0, -1);
-}
+      /** @param {HTMLInputElement} el */
+      function normalizeTrailingDot(el) {
+        if (el.value.endsWith(".")) el.value = el.value.slice(0, -1);
+      }
 
-/* ── Recent / History ───────────────────────────── */
+      /* ── Recent / History ───────────────────────────── */
 
-/** @param {Object} data */
-function saveRecent(data) {
-  const { date, time } = getTimestamp();
-  recentCalcs.unshift({
-    ...data,
-    isoKey: DOM.isotope.value,
-    tsDate: date,
-    tsTime: time,
-  });
-  recentCalcs = recentCalcs.slice(0, MAX_RECENT);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(recentCalcs));
-  renderRecent();
-}
+      /** @param {Object} data */
+      function saveRecent(data) {
+        const { date, time } = getTimestamp();
+        recentCalcs.unshift({
+          ...data,
+          isoKey: DOM.isotope.value,
+          tsDate: date,
+          tsTime: time,
+        });
+        recentCalcs = recentCalcs.slice(0, MAX_RECENT);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(recentCalcs));
+        renderRecent();
+      }
 
-function clearRecent() {
-  recentCalcs = [];
-  localStorage.setItem(STORAGE_KEY, '[]');
-  renderRecent();
-}
+      function clearRecent() {
+        recentCalcs = [];
+        localStorage.setItem(STORAGE_KEY, "[]");
+        renderRecent();
+      }
 
-function renderRecent() {
-  const list = DOM.recentList;
-  if (!recentCalcs.length) {
-    list.innerHTML = '<div class="empty-state">Chưa có kết quả nào</div>';
-    return;
-  }
-  list.innerHTML = recentCalcs.map(e => {
-    const iso = ISOTOPES[e.isoKey];
-    const isoName = iso?.name || e.isoKey || '';
-    const color = iso?.color || '#6cb6ff';
-    const uLb = getUnitLabel(e.unit || 'mCi');
-    const mainLine = e.t12
-      ? 'T½: ' + fmt(e.t12) + ' ph'
-      : 'A(t): ' + formatDisplay(e.at, e.unit);
-    const subLine = 'A₀: ' + fmt(toDisplay(e.a0, e.unit)) + ' ' + uLb + ' | Δt: ' + formatDuration(e.delta);
-    const dateStr = e.tsDate || '';
-    const timeStr = e.tsTime || e.ts || '';
-    return '<div class="recent-row">' +
-      '<div class="iso-badge" style="color:' + color + ';background:' + color + '1a;border-color:' + color + '48">' + isoName + '</div>' +
-      '<div class="rr-body"><div class="ri-main">' + mainLine + '</div><div class="ri-sub">' + subLine + '</div></div>' +
-      '<div class="rr-ts"><div class="ri-ts-date">' + dateStr + '</div><div class="ri-ts-time">' + timeStr + '</div></div>' +
-      '</div>';
-  }).join('');
-}
+      function renderRecent() {
+        const list = DOM.recentList;
+        if (!recentCalcs.length) {
+          list.innerHTML = '<div class="empty-state">Chưa có kết quả nào</div>';
+          return;
+        }
+        list.innerHTML = recentCalcs
+          .map((e) => {
+            const iso = ISOTOPES[e.isoKey];
+            const isoName = iso?.name || e.isoKey || "";
+            const color = iso?.color || "#6cb6ff";
+            const uLb = getUnitLabel(e.unit || "mCi");
+            const mainLine = e.t12
+              ? "T½: " + fmt(e.t12) + " ph"
+              : "A(t): " + formatDisplay(e.at, e.unit);
+            const subLine =
+              "A₀: " +
+              fmt(toDisplay(e.a0, e.unit)) +
+              " " +
+              uLb +
+              " | Δt: " +
+              formatDuration(e.delta);
+            const dateStr = e.tsDate || "";
+            const timeStr = e.tsTime || e.ts || "";
+            return (
+              '<div class="recent-row">' +
+              '<div class="iso-badge" style="color:' +
+              color +
+              ";background:" +
+              color +
+              "1a;border-color:" +
+              color +
+              '48">' +
+              isoName +
+              "</div>" +
+              '<div class="rr-body"><div class="ri-main">' +
+              mainLine +
+              '</div><div class="ri-sub">' +
+              subLine +
+              "</div></div>" +
+              '<div class="rr-ts"><div class="ri-ts-date">' +
+              dateStr +
+              '</div><div class="ri-ts-time">' +
+              timeStr +
+              "</div></div>" +
+              "</div>"
+            );
+          })
+          .join("");
+      }
 
-function toggleHistory() {
-  const panel = DOM.historyPanel;
-  const content = DOM.historyContent;
-  const ch = DOM.histChev;
-  const isOpen = panel.classList.contains('open');
+      function toggleHistory() {
+        const panel = DOM.historyPanel;
+        const content = DOM.historyContent;
+        const ch = DOM.histChev;
+        const isOpen = panel.classList.contains("open");
 
-  if (isOpen) {
-    content.style.maxHeight = content.scrollHeight + 'px';
-    content.getBoundingClientRect();
-    content.style.maxHeight = '0px';
-    panel.classList.remove('open');
-    content.setAttribute('aria-hidden', 'true');
-    content.inert = true;
-    if (ch) ch.textContent = '+';
-  } else {
-    panel.classList.add('open');
-    content.removeAttribute('aria-hidden');
-    content.inert = false;
-    if (ch) ch.textContent = '−';
-    requestAnimationFrame(() => {
-      const target = Math.min(content.scrollHeight, 420);
-      content.style.maxHeight = target + 'px';
-    });
-  }
-}
+        if (isOpen) {
+          content.style.maxHeight = content.scrollHeight + "px";
+          content.getBoundingClientRect();
+          content.style.maxHeight = "0px";
+          panel.classList.remove("open");
+          content.setAttribute("aria-hidden", "true");
+          content.inert = true;
+          if (ch) ch.textContent = "+";
+        } else {
+          panel.classList.add("open");
+          content.removeAttribute("aria-hidden");
+          content.inert = false;
+          if (ch) ch.textContent = "−";
+          requestAnimationFrame(() => {
+            const target = Math.min(content.scrollHeight, 420);
+            content.style.maxHeight = target + "px";
+          });
+        }
+      }
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    BUSINESS LOGIC
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Tab 1: Decay ───────────────────────────────── */
+      /* ── Tab 1: Decay ───────────────────────────────── */
 
-function calcDecay() {
-  const a0 = parseFloat(DOM.dA0.value);
-  const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-  const uKey = DOM.dUnit.value;
-  const uLb = getUnitLabel(uKey);
+      function calcDecay() {
+        const a0 = parseFloat(DOM.dA0.value);
+        const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+        const uKey = DOM.dUnit.value;
+        const uLb = getUnitLabel(uKey);
 
-  if (!isFinite(a0) || a0 <= 0) {
-    ['at_main', 'at_minus', 'at_plus'].forEach(id => document.getElementById(id).textContent = '—');
-    DOM.dInfoPanel.classList.add('hidden');
-    clearChart();
-    buildQuickTable(0, uKey);
-    return;
-  }
+        if (!isFinite(a0) || a0 <= 0) {
+          ["at_main", "at_minus", "at_plus"].forEach(
+            (id) => (document.getElementById(id).textContent = "—"),
+          );
+          DOM.dInfoPanel.classList.add("hidden");
+          clearChart();
+          buildQuickTable(0, uKey);
+          return;
+        }
 
-  const at = decay(a0, t);
-  const pct = (at / a0) * 100;
+        const at = decay(a0, t);
+        const pct = (at / a0) * 100;
 
-  DOM.atMain.textContent = fmt(toDisplay(at, uKey));
-  DOM.atMinus.textContent = fmt(toDisplay(at * 0.95, uKey));
-  DOM.atPlus.textContent = fmt(toDisplay(at * 1.05, uKey));
-  DOM.atMainU.textContent = uLb;
-  DOM.atMinusU.textContent = uLb;
-  DOM.atPlusU.textContent = uLb;
+        DOM.atMain.textContent = fmt(toDisplay(at, uKey));
+        DOM.atMinus.textContent = fmt(toDisplay(at * 0.95, uKey));
+        DOM.atPlus.textContent = fmt(toDisplay(at * 1.05, uKey));
+        DOM.atMainU.textContent = uLb;
+        DOM.atMinusU.textContent = uLb;
+        DOM.atPlusU.textContent = uLb;
 
-  DOM.dInfoPanel.classList.remove('hidden');
-  DOM.dPct.textContent = pct.toFixed(2) + '%';
-  DOM.dHlN.textContent = (t / getHalfLife()).toFixed(3) + ' T½';
-  DOM.dDecayed.textContent = formatDisplay(a0 - at, uKey);
+        DOM.dInfoPanel.classList.remove("hidden");
+        DOM.dPct.textContent = pct.toFixed(2) + "%";
+        DOM.dHlN.textContent = (t / getHalfLife()).toFixed(3) + " T½";
+        DOM.dDecayed.textContent = formatDisplay(a0 - at, uKey);
 
-  buildQuickTable(a0, uKey);
-  drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
-}
+        buildQuickTable(a0, uKey);
+        drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
+      }
 
-function saveDecayResult() {
-  const a0 = parseFloat(DOM.dA0.value);
-  if (!isFinite(a0) || a0 <= 0) return;
-  const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-  const uKey = DOM.dUnit.value;
-  saveRecent({ type: 'Decay', a0, delta: t, at: decay(a0, t), unit: uKey });
-}
+      function saveDecayResult() {
+        const a0 = parseFloat(DOM.dA0.value);
+        if (!isFinite(a0) || a0 <= 0) return;
+        const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+        const uKey = DOM.dUnit.value;
+        saveRecent({
+          type: "Decay",
+          a0,
+          delta: t,
+          at: decay(a0, t),
+          unit: uKey,
+        });
+      }
 
-function buildQuickTable(a0, uKey) {
-  const rows = DOM.qtRows;
-  const hdrEl = DOM.qtA0Header;
-  const iso = getIsotope();
+      function buildQuickTable(a0, uKey) {
+        const rows = DOM.qtRows;
+        const hdrEl = DOM.qtA0Header;
+        const iso = getIsotope();
 
-  if (!isFinite(a0) || a0 <= 0) {
-    rows.innerHTML = '<div class="empty-state">Nhập A₀ để xem bảng phân rã</div>';
-    hdrEl.classList.add('hidden');
-    return;
-  }
+        if (!isFinite(a0) || a0 <= 0) {
+          rows.innerHTML =
+            '<div class="empty-state">Nhập A₀ để xem bảng phân rã</div>';
+          hdrEl.classList.add("hidden");
+          return;
+        }
 
-  const uLb = getUnitLabel(uKey);
-  hdrEl.classList.remove('hidden');
-  hdrEl.innerHTML = 'A₀ = <span style="color:#fff;font-weight:700">' +
-    fmt(toDisplay(a0, uKey)) + ' ' + uLb + '</span>';
+        const uLb = getUnitLabel(uKey);
+        hdrEl.classList.remove("hidden");
+        hdrEl.innerHTML =
+          'A₀ = <span style="color:#fff;font-weight:700">' +
+          fmt(toDisplay(a0, uKey)) +
+          " " +
+          uLb +
+          "</span>";
 
-  const presets = getPresets(iso.halfLife);
-  rows.innerHTML = presets.map(({ l, t }) => {
-    const at = decay(a0, t);
-    const pct = (at / a0) * 100;
-    const c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
-    return '<div class="qt-row">' +
-      '<div class="qt-time">' + l + '</div>' +
-      '<div class="qt-val" style="color:' + c + '">' + fmt(toDisplay(at, uKey)) + '</div>' +
-      '<div class="qt-pct" style="color:' + c + '">' + pct.toFixed(1) + '%</div>' +
-      '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%;background:' + c + '"></div></div>' +
-      '</div>';
-  }).join('');
-}
+        const presets = getPresets(iso.halfLife);
+        rows.innerHTML = presets
+          .map(({ l, t }) => {
+            const at = decay(a0, t);
+            const pct = (at / a0) * 100;
+            const c = pct > 60 ? "#59d98e" : pct > 30 ? "#ffb84d" : "#ff6b6b";
+            return (
+              '<div class="qt-row">' +
+              '<div class="qt-time">' +
+              l +
+              "</div>" +
+              '<div class="qt-val" style="color:' +
+              c +
+              '">' +
+              fmt(toDisplay(at, uKey)) +
+              "</div>" +
+              '<div class="qt-pct" style="color:' +
+              c +
+              '">' +
+              pct.toFixed(1) +
+              "%</div>" +
+              '<div class="bar-wrap"><div class="bar-fill" style="width:' +
+              pct +
+              "%;background:" +
+              c +
+              '"></div></div>' +
+              "</div>"
+            );
+          })
+          .join("");
+      }
 
-/* ── Chart ──────────────────────────────────────── */
+      /* ── Chart ──────────────────────────────────────── */
 
-function clearChart() {
-  const cv = DOM.decayChart;
-  if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.parentElement.clientWidth || 300;
-  const h = 150;
-  cv.width = w * dpr;
-  cv.height = h * dpr;
-  cv.style.width = w + 'px';
-  cv.style.height = h + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(228,242,255,.55)';
-  ctx.font = '13px "Be Vietnam Pro",sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Nhập A₀ để xem đồ thị phân rã', w / 2, h / 2);
-}
+      function clearChart() {
+        const cv = DOM.decayChart;
+        if (!cv) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = cv.parentElement.clientWidth || 300;
+        const h = 150;
+        cv.width = w * dpr;
+        cv.height = h * dpr;
+        cv.style.width = w + "px";
+        cv.style.height = h + "px";
+        const ctx = cv.getContext("2d");
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "rgba(228,242,255,.55)";
+        ctx.font = '13px "Be Vietnam Pro",sans-serif';
+        ctx.textAlign = "center";
+        ctx.fillText("Nhập A₀ để xem đồ thị phân rã", w / 2, h / 2);
+      }
 
-/**
- * @param {{a0:number, tCurrent:number, unitKey:string}} params
- */
-function drawDecayChart({ a0, tCurrent, unitKey }) {
-  const cv = DOM.decayChart;
-  if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.parentElement.clientWidth || 300;
-  const h = 150;
-  cv.width = w * dpr;
-  cv.height = h * dpr;
-  cv.style.width = w + 'px';
-  cv.style.height = h + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
+      /**
+       * @param {{a0:number, tCurrent:number, unitKey:string}} params
+       */
+      function drawDecayChart({ a0, tCurrent, unitKey }) {
+        const cv = DOM.decayChart;
+        if (!cv) return;
+        const dpr = window.devicePixelRatio || 1;
+        const w = cv.parentElement.clientWidth || 300;
+        const h = 150;
+        cv.width = w * dpr;
+        cv.height = h * dpr;
+        cv.style.width = w + "px";
+        cv.style.height = h + "px";
+        const ctx = cv.getContext("2d");
+        ctx.scale(dpr, dpr);
 
-  const hl = getHalfLife();
-  const iso = getIsotope();
-  const color = iso.color;
-  const uF = getUnitFactor(unitKey);
-  const uLb = getUnitLabel(unitKey);
-  const a0disp = a0 * uF;
-  const maxT = Math.max(hl * 4, tCurrent * 1.3, 480);
-  const pad = { l: 58, r: 14, t: 14, b: 24 };
-  const cw = w - pad.l - pad.r;
-  const ch = h - pad.t - pad.b;
-  const xS = cw / maxT;
-  const yS = ch / a0disp;
+        const hl = getHalfLife();
+        const iso = getIsotope();
+        const color = iso.color;
+        const uF = getUnitFactor(unitKey);
+        const uLb = getUnitLabel(unitKey);
+        const a0disp = a0 * uF;
+        const maxT = Math.max(hl * 4, tCurrent * 1.3, 480);
+        const pad = { l: 58, r: 14, t: 14, b: 24 };
+        const cw = w - pad.l - pad.r;
+        const ch = h - pad.t - pad.b;
+        const xS = cw / maxT;
+        const yS = ch / a0disp;
 
-  ctx.clearRect(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
 
-  // Y-axis gridlines
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + ch * i / 4;
-    ctx.beginPath();
-    ctx.moveTo(pad.l, y);
-    ctx.lineTo(w - pad.r, y);
-    ctx.strokeStyle = 'rgba(255,255,255,.05)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(184,207,224,.6)';
-    ctx.font = '9px monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(fmt(a0disp * (1 - i / 4)), pad.l - 3, y + 3);
-  }
+        // Y-axis gridlines
+        for (let i = 0; i <= 4; i++) {
+          const y = pad.t + (ch * i) / 4;
+          ctx.beginPath();
+          ctx.moveTo(pad.l, y);
+          ctx.lineTo(w - pad.r, y);
+          ctx.strokeStyle = "rgba(255,255,255,.05)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.fillStyle = "rgba(184,207,224,.6)";
+          ctx.font = "9px monospace";
+          ctx.textAlign = "right";
+          ctx.fillText(fmt(a0disp * (1 - i / 4)), pad.l - 3, y + 3);
+        }
 
-  // Half-life vertical guides
-  for (let n = 1; n * hl <= maxT; n++) {
-    const x = pad.l + n * hl * xS;
-    ctx.setLineDash([2, 5]);
-    ctx.beginPath();
-    ctx.moveTo(x, pad.t);
-    ctx.lineTo(x, h - pad.b);
-    ctx.strokeStyle = 'rgba(255,255,255,.05)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
+        // Half-life vertical guides
+        for (let n = 1; n * hl <= maxT; n++) {
+          const x = pad.l + n * hl * xS;
+          ctx.setLineDash([2, 5]);
+          ctx.beginPath();
+          ctx.moveTo(x, pad.t);
+          ctx.lineTo(x, h - pad.b);
+          ctx.strokeStyle = "rgba(255,255,255,.05)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
 
-  // Fill area
-  const grad = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
-  grad.addColorStop(0, color + '2a');
-  grad.addColorStop(1, 'transparent');
-  ctx.beginPath();
-  let first = true;
-  for (let i = 0; i <= 300; i++) {
-    const t = (i / 300) * maxT;
-    const x = pad.l + t * xS;
-    const y = h - pad.b - decay(a0, t) * uF * yS;
-    first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    first = false;
-  }
-  ctx.lineTo(pad.l + maxT * xS, h - pad.b);
-  ctx.lineTo(pad.l, h - pad.b);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+        // Fill area
+        const grad = ctx.createLinearGradient(0, pad.t, 0, h - pad.b);
+        grad.addColorStop(0, color + "2a");
+        grad.addColorStop(1, "transparent");
+        ctx.beginPath();
+        let first = true;
+        for (let i = 0; i <= 300; i++) {
+          const t = (i / 300) * maxT;
+          const x = pad.l + t * xS;
+          const y = h - pad.b - decay(a0, t) * uF * yS;
+          first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          first = false;
+        }
+        ctx.lineTo(pad.l + maxT * xS, h - pad.b);
+        ctx.lineTo(pad.l, h - pad.b);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
 
-  // Curve
-  const lg = ctx.createLinearGradient(pad.l, 0, w - pad.r, 0);
-  lg.addColorStop(0, color);
-  lg.addColorStop(1, color + '99');
-  ctx.beginPath();
-  first = true;
-  for (let i = 0; i <= 300; i++) {
-    const t = (i / 300) * maxT;
-    const x = pad.l + t * xS;
-    const y = h - pad.b - decay(a0, t) * uF * yS;
-    first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    first = false;
-  }
-  ctx.strokeStyle = lg;
-  ctx.lineWidth = 2;
-  ctx.stroke();
+        // Curve
+        const lg = ctx.createLinearGradient(pad.l, 0, w - pad.r, 0);
+        lg.addColorStop(0, color);
+        lg.addColorStop(1, color + "99");
+        ctx.beginPath();
+        first = true;
+        for (let i = 0; i <= 300; i++) {
+          const t = (i / 300) * maxT;
+          const x = pad.l + t * xS;
+          const y = h - pad.b - decay(a0, t) * uF * yS;
+          first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          first = false;
+        }
+        ctx.strokeStyle = lg;
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-  // Current point marker
-  if (tCurrent >= 0 && tCurrent <= maxT) {
-    const at = decay(a0, tCurrent);
-    const atDisp = at * uF;
-    const cx = pad.l + tCurrent * xS;
-    const cy = h - pad.b - atDisp * yS;
+        // Current point marker
+        if (tCurrent >= 0 && tCurrent <= maxT) {
+          const at = decay(a0, tCurrent);
+          const atDisp = at * uF;
+          const cx = pad.l + tCurrent * xS;
+          const cy = h - pad.b - atDisp * yS;
 
-    ctx.setLineDash([3, 4]);
-    ctx.beginPath();
-    ctx.moveTo(cx, pad.t);
-    ctx.lineTo(cx, h - pad.b);
-    ctx.strokeStyle = color + '44';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.setLineDash([]);
+          ctx.setLineDash([3, 4]);
+          ctx.beginPath();
+          ctx.moveTo(cx, pad.t);
+          ctx.lineTo(cx, h - pad.b);
+          ctx.strokeStyle = color + "44";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.setLineDash([]);
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
 
-    const lbl = fmt(atDisp) + ' ' + uLb;
-    ctx.font = 'bold 10px monospace';
-    ctx.textAlign = 'left';
-    const tw = ctx.measureText(lbl).width;
-    const lblH = 13;
-    const lblPad = 4;
-    let tx = cx + 9;
-    let ty = cy - 10;
-    if (tx + tw + lblPad > w - pad.r) tx = cx - tw - 9;
-    if (ty - lblH < pad.t) ty = cy + 20;
+          const lbl = fmt(atDisp) + " " + uLb;
+          ctx.font = "bold 10px monospace";
+          ctx.textAlign = "left";
+          const tw = ctx.measureText(lbl).width;
+          const lblH = 13;
+          const lblPad = 4;
+          let tx = cx + 9;
+          let ty = cy - 10;
+          if (tx + tw + lblPad > w - pad.r) tx = cx - tw - 9;
+          if (ty - lblH < pad.t) ty = cy + 20;
 
-    ctx.fillStyle = 'rgba(8,14,22,.92)';
-    const rx = tx - lblPad;
-    const ry = ty - lblH + 2;
-    const rw = tw + lblPad * 2;
-    const rh = lblH + 2;
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, 4);
-    else ctx.fillRect(rx, ry, rw, rh);
-    ctx.fill();
-    ctx.strokeStyle = color + '55';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = color;
-    ctx.fillText(lbl, tx, ty);
-  }
+          ctx.fillStyle = "rgba(8,14,22,.92)";
+          const rx = tx - lblPad;
+          const ry = ty - lblH + 2;
+          const rw = tw + lblPad * 2;
+          const rh = lblH + 2;
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(rx, ry, rw, rh, 4);
+          else ctx.fillRect(rx, ry, rw, rh);
+          ctx.fill();
+          ctx.strokeStyle = color + "55";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.fillStyle = color;
+          ctx.fillText(lbl, tx, ty);
+        }
 
-  // X-axis time labels
-  const step = maxT <= 480 ? 60 : maxT <= 2880 ? 360 : maxT <= 10080 ? 1440 : 2880;
-  ctx.fillStyle = 'rgba(184,207,224,.55)';
-  ctx.font = '9px monospace';
-  ctx.textAlign = 'center';
-  for (let t = 0; t <= maxT; t += step) {
-    const lbl = t < 60 ? t + 'm' : t < 1440 ? (t / 60) + 'h' : Math.round(t / 1440) + 'd';
-    ctx.fillText(lbl, pad.l + t * xS, h - 5);
-  }
-}
+        // X-axis time labels
+        const step =
+          maxT <= 480 ? 60 : maxT <= 2880 ? 360 : maxT <= 10080 ? 1440 : 2880;
+        ctx.fillStyle = "rgba(184,207,224,.55)";
+        ctx.font = "9px monospace";
+        ctx.textAlign = "center";
+        for (let t = 0; t <= maxT; t += step) {
+          const lbl =
+            t < 60
+              ? t + "m"
+              : t < 1440
+                ? t / 60 + "h"
+                : Math.round(t / 1440) + "d";
+          ctx.fillText(lbl, pad.l + t * xS, h - 5);
+        }
+      }
 
-/* ── Tab 2: Realtime ────────────────────────────── */
+      /* ── Tab 2: Realtime ────────────────────────────── */
 
-function calcRealtime() {
-  const a0 = parseFloat(DOM.rtA0.value);
-  const uKey = DOM.rtUnit.value;
-  const sm = getTimeMins('rt_start');
-  const em = getTimeMins('rt_end');
-  const pan = DOM.rtResults;
-  const btn = DOM.rtSaveBtn;
+      function calcRealtime() {
+        const a0 = parseFloat(DOM.rtA0.value);
+        const uKey = DOM.rtUnit.value;
+        const sm = getTimeMins("rt_start");
+        const em = getTimeMins("rt_end");
+        const pan = DOM.rtResults;
+        const btn = DOM.rtSaveBtn;
 
-  if (!isFinite(a0) || a0 <= 0 || sm === null || em === null) {
-    pan.style.opacity = '.3';
-    btn.disabled = true;
-    return;
-  }
+        if (!isFinite(a0) || a0 <= 0 || sm === null || em === null) {
+          pan.style.opacity = ".3";
+          btn.disabled = true;
+          return;
+        }
 
-  const delta = clockDelta(sm, em);
-  const at = decay(a0, delta);
-  const pct = (at / a0) * 100;
-  const uLb = getUnitLabel(uKey);
+        const delta = clockDelta(sm, em);
+        const at = decay(a0, delta);
+        const pct = (at / a0) * 100;
+        const uLb = getUnitLabel(uKey);
 
-  pan.style.opacity = '1';
-  DOM.rtDelta.textContent = formatDuration(delta);
-  DOM.rtResult.textContent = fmt(toDisplay(at, uKey));
-  DOM.rtUnitLbl.textContent = uLb;
+        pan.style.opacity = "1";
+        DOM.rtDelta.textContent = formatDuration(delta);
+        DOM.rtResult.textContent = fmt(toDisplay(at, uKey));
+        DOM.rtUnitLbl.textContent = uLb;
 
-  const pctEl = DOM.rtPct;
-  pctEl.textContent = pct.toFixed(2) + '%';
-  pctEl.style.color = pct > 60 ? 'var(--green)' : pct > 30 ? 'var(--orange)' : 'var(--red)';
+        const pctEl = DOM.rtPct;
+        pctEl.textContent = pct.toFixed(2) + "%";
+        pctEl.style.color =
+          pct > 60 ? "var(--green)" : pct > 30 ? "var(--orange)" : "var(--red)";
 
-  drawArc(pct);
+        drawArc(pct);
 
-  btn.disabled = false;
-  btn.dataset.a0 = a0;
-  btn.dataset.delta = delta;
-  btn.dataset.at = at;
-  btn.dataset.unit = uKey;
-}
+        btn.disabled = false;
+        btn.dataset.a0 = a0;
+        btn.dataset.delta = delta;
+        btn.dataset.at = at;
+        btn.dataset.unit = uKey;
+      }
 
-function saveRealtimeResult() {
-  const btn = DOM.rtSaveBtn;
-  saveRecent({
-    type: 'Realtime',
-    a0: +btn.dataset.a0,
-    delta: +btn.dataset.delta,
-    at: +btn.dataset.at,
-    unit: btn.dataset.unit,
-  });
-}
+      function saveRealtimeResult() {
+        const btn = DOM.rtSaveBtn;
+        saveRecent({
+          type: "Realtime",
+          a0: +btn.dataset.a0,
+          delta: +btn.dataset.delta,
+          at: +btn.dataset.at,
+          unit: btn.dataset.unit,
+        });
+      }
 
-/** @param {number} pct */
-function drawArc(pct) {
-  const cv = DOM.rtArc;
-  if (!cv) return;
-  const dpr = window.devicePixelRatio || 1;
-  cv.width = cv.height = 88 * dpr;
-  cv.style.width = cv.style.height = '88px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-  const cx = 44, cy = 44, r = 34;
-  const c = pct > 60 ? '#59d98e' : pct > 30 ? '#ffb84d' : '#ff6b6b';
+      /** @param {number} pct */
+      function drawArc(pct) {
+        const cv = DOM.rtArc;
+        if (!cv) return;
+        const dpr = window.devicePixelRatio || 1;
+        cv.width = cv.height = 88 * dpr;
+        cv.style.width = cv.style.height = "88px";
+        const ctx = cv.getContext("2d");
+        ctx.scale(dpr, dpr);
+        const cx = 44,
+          cy = 44,
+          r = 34;
+        const c = pct > 60 ? "#59d98e" : pct > 30 ? "#ffb84d" : "#ff6b6b";
 
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,.07)';
-  ctx.lineWidth = 7;
-  ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255,.07)";
+        ctx.lineWidth = 7;
+        ctx.stroke();
 
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, -Math.PI / 2, (pct / 100) * Math.PI * 2 - Math.PI / 2);
-  ctx.strokeStyle = c;
-  ctx.lineWidth = 7;
-  ctx.lineCap = 'round';
-  ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(
+          cx,
+          cy,
+          r,
+          -Math.PI / 2,
+          (pct / 100) * Math.PI * 2 - Math.PI / 2,
+        );
+        ctx.strokeStyle = c;
+        ctx.lineWidth = 7;
+        ctx.lineCap = "round";
+        ctx.stroke();
 
-  ctx.fillStyle = c;
-  ctx.font = 'bold 13px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(pct.toFixed(0) + '%', cx, cy + 5);
-}
+        ctx.fillStyle = c;
+        ctx.font = "bold 13px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(pct.toFixed(0) + "%", cx, cy + 5);
+      }
 
-/* ── Tab 2: Reverse ────────────────────────────── */
+      /* ── Tab 2: Reverse ────────────────────────────── */
 
-function calcReverse() {
-  const target = parseFloat(DOM.rvTarget.value);
-  const uKey = DOM.rvUnit.value;
-  const pm = getTimeMins('rv_start');
-  const um = getTimeMins('rv_end');
+      function calcReverse() {
+        const target = parseFloat(DOM.rvTarget.value);
+        const uKey = DOM.rvUnit.value;
+        const pm = getTimeMins("rv_start");
+        const um = getTimeMins("rv_end");
 
-  if (!isFinite(target) || target <= 0 || pm === null || um === null) {
-    DOM.rvResult.textContent = '—';
-    DOM.rvDelta.textContent = '—';
-    return;
-  }
+        if (!isFinite(target) || target <= 0 || pm === null || um === null) {
+          DOM.rvResult.textContent = "—";
+          DOM.rvDelta.textContent = "—";
+          return;
+        }
 
-  const delta = clockDelta(pm, um);
-  const targetRaw = target / getUnitFactor(uKey);
-  const needed = targetRaw * Math.exp(Math.LN2 * delta / getHalfLife());
+        const delta = clockDelta(pm, um);
+        const targetRaw = target / getUnitFactor(uKey);
+        const needed = targetRaw * Math.exp((Math.LN2 * delta) / getHalfLife());
 
-  DOM.rvResult.textContent = formatDisplay(needed, uKey);
-  DOM.rvDelta.textContent = formatDuration(delta);
-}
+        DOM.rvResult.textContent = formatDisplay(needed, uKey);
+        DOM.rvDelta.textContent = formatDuration(delta);
+      }
 
-/* ── Tab 3: Half-life ───────────────────────────── */
+      /* ── Tab 3: Half-life ───────────────────────────── */
 
-function calcHalflife() {
-  const a0 = parseFloat(DOM.hA0.value);
-  const at = parseFloat(DOM.hAt.value);
-  const tRaw = parseFloat(DOM.hT.value);
-  const tUnit = DOM.hTUnit?.value || 'min';
-  const t = toMinutes(tRaw, tUnit);
+      function calcHalflife() {
+        const a0 = parseFloat(DOM.hA0.value);
+        const at = parseFloat(DOM.hAt.value);
+        const tRaw = parseFloat(DOM.hT.value);
+        const tUnit = DOM.hTUnit?.value || "min";
+        const t = toMinutes(tRaw, tUnit);
 
-  if (!isFinite(t) || !isFinite(a0) || !isFinite(at) || at >= a0 || a0 <= 0 || at <= 0 || t <= 0) {
-    DOM.hT12Smart.textContent = '—';
-    DOM.hT12SmartUnit.textContent = '—';
-    DOM.hT12Min.textContent = '—';
-    DOM.hInfo.classList.add('hidden');
-    DOM.hQcMarker.style.display = 'none';
-    DOM.hQcBar?.classList.remove('active');
-    return;
-  }
+        if (
+          !isFinite(t) ||
+          !isFinite(a0) ||
+          !isFinite(at) ||
+          at >= a0 ||
+          a0 <= 0 ||
+          at <= 0 ||
+          t <= 0
+        ) {
+          DOM.hT12Smart.textContent = "—";
+          DOM.hT12SmartUnit.textContent = "—";
+          DOM.hT12Min.textContent = "—";
+          DOM.hInfo.classList.add("hidden");
+          DOM.hQcMarker.style.display = "none";
+          DOM.hQcBar?.classList.remove("active");
+          return;
+        }
 
-  const t12 = (Math.LN2 * t) / Math.log(a0 / at);
-  const theory = getHalfLife();
-  const diff = t12 - theory;
-  const diffPct = (diff / theory) * 100;
-  const absD = Math.abs(diffPct);
+        const t12 = (Math.LN2 * t) / Math.log(a0 / at);
+        const theory = getHalfLife();
+        const diff = t12 - theory;
+        const diffPct = (diff / theory) * 100;
+        const absD = Math.abs(diffPct);
 
-  // Smart unit
-  let smartVal, smartUnit;
-  if (t12 < 180) { smartVal = fmt(t12); smartUnit = 'phút'; }
-  else if (t12 < 2880) { smartVal = (t12 / 60).toFixed(3); smartUnit = 'giờ'; }
-  else { smartVal = (t12 / 1440).toFixed(3); smartUnit = 'ngày'; }
+        // Smart unit
+        let smartVal, smartUnit;
+        if (t12 < 180) {
+          smartVal = fmt(t12);
+          smartUnit = "phút";
+        } else if (t12 < 2880) {
+          smartVal = (t12 / 60).toFixed(3);
+          smartUnit = "giờ";
+        } else {
+          smartVal = (t12 / 1440).toFixed(3);
+          smartUnit = "ngày";
+        }
 
-  DOM.hT12Smart.textContent = smartVal;
-  DOM.hT12SmartUnit.textContent = smartUnit;
-  DOM.hT12Min.textContent = fmt(t12);
+        DOM.hT12Smart.textContent = smartVal;
+        DOM.hT12SmartUnit.textContent = smartUnit;
+        DOM.hT12Min.textContent = fmt(t12);
 
-  DOM.hInfo.classList.remove('hidden');
-  DOM.hTheory.textContent = fmt(theory) + ' phút';
-  DOM.hActual.textContent = fmt(t12) + ' phút';
-  DOM.hDiff.textContent = (diff > 0 ? '+' : '') + diff.toFixed(2) + ' ph (' + diffPct.toFixed(1) + '%)';
+        DOM.hInfo.classList.remove("hidden");
+        DOM.hTheory.textContent = fmt(theory) + " phút";
+        DOM.hActual.textContent = fmt(t12) + " phút";
+        DOM.hDiff.textContent =
+          (diff > 0 ? "+" : "") +
+          diff.toFixed(2) +
+          " ph (" +
+          diffPct.toFixed(1) +
+          "%)";
 
-  let evalHTML;
-  if (absD < 2) evalHTML = '<span class="eval-ok">Đạt — Sai lệch &lt;2%</span>';
-  else if (absD < 5) evalHTML = '<span class="eval-warn">Cần xem lại — Sai lệch 2–5%</span>';
-  else evalHTML = '<span class="eval-bad">Không đạt — Sai lệch &gt;5%</span>';
-  DOM.hEval.innerHTML = evalHTML;
+        let evalHTML;
+        if (absD < 2)
+          evalHTML = '<span class="eval-ok">Đạt — Sai lệch &lt;2%</span>';
+        else if (absD < 5)
+          evalHTML =
+            '<span class="eval-warn">Cần xem lại — Sai lệch 2–5%</span>';
+        else
+          evalHTML =
+            '<span class="eval-bad">Không đạt — Sai lệch &gt;5%</span>';
+        DOM.hEval.innerHTML = evalHTML;
 
-  // QC range marker
-  const marker = DOM.hQcMarker;
-  const clampedPct = Math.max(-5, Math.min(5, diffPct));
-  const barPos = ((clampedPct + 5) / 10) * 100;
-  marker.style.left = barPos + '%';
-  marker.style.display = 'block';
-  DOM.hQcBar?.classList.add('active');
+        // QC range marker
+        const marker = DOM.hQcMarker;
+        const clampedPct = Math.max(-5, Math.min(5, diffPct));
+        const barPos = ((clampedPct + 5) / 10) * 100;
+        marker.style.left = barPos + "%";
+        marker.style.display = "block";
+        DOM.hQcBar?.classList.add("active");
 
-  halfLifeState = { a0, at, t, t12 };
-}
+        halfLifeState = { a0, at, t, t12 };
+      }
 
-function saveHalflifeResult() {
-  if (!halfLifeState) return;
-  const currentUnit = DOM.dUnit.value;
-  saveRecent({
-    type: 'Half-life',
-    a0: halfLifeState.a0,
-    delta: halfLifeState.t,
-    at: halfLifeState.at,
-    t12: halfLifeState.t12,
-    unit: currentUnit,
-  });
-}
+      function saveHalflifeResult() {
+        if (!halfLifeState) return;
+        const currentUnit = DOM.dUnit.value;
+        saveRecent({
+          type: "Half-life",
+          a0: halfLifeState.a0,
+          delta: halfLifeState.t,
+          at: halfLifeState.at,
+          t12: halfLifeState.t12,
+          unit: currentUnit,
+        });
+      }
 
-/* ── Isotope Change ─────────────────────────────── */
+      /* ── Isotope Change ─────────────────────────────── */
 
-function onIsotopeChange() {
-  const iso = getIsotope();
-  DOM.hlDisplay.textContent = formatHalfLife(iso.halfLife);
+      function onIsotopeChange() {
+        const iso = getIsotope();
+        DOM.hlDisplay.textContent = formatHalfLife(iso.halfLife);
 
-  const ids = ['iso-label-decay', 'iso-label-rt', 'iso-label-hl', 'qt_iso_label'];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = iso.name;
-  });
+        const ids = [
+          "iso-label-decay",
+          "iso-label-rt",
+          "iso-label-hl",
+          "qt_iso_label",
+        ];
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = iso.name;
+        });
 
-  calcDecay();
-  calcRealtime();
-  calcHalflife();
-}
+        calcDecay();
+        calcRealtime();
+        calcHalflife();
+      }
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    TAB INITIALIZATION (New Floating Navigation Bar)
    ═══════════════════════════════════════════════════════════════ */
 
-function initTabs() {
-  const navItems = DOM.navItems;
-  const contents = DOM.tabContents;
-  let active = document.querySelector('.nav-item.active');
+      function initTabs() {
+        const navItems = DOM.navItems;
+        const contents = DOM.tabContents;
+        let active = document.querySelector(".nav-item.active");
 
-  navItems.forEach(item => {
-    item.addEventListener('click', function(e) {
-      const tabId = this.dataset.tab;
-      const targetPanel = document.getElementById(tabId);
-      if (!targetPanel) return;
+        navItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            const tabId = this.dataset.tab;
+            const targetPanel = document.getElementById(tabId);
+            if (!targetPanel) return;
 
-      // Only switch if not already active
-      if (this.classList.contains('active')) return;
+            // Only switch if not already active
+            if (this.classList.contains("active")) return;
 
-      // Update nav items
-      navItems.forEach(n => n.classList.remove('active'));
-      this.classList.add('active');
+            // Update nav items
+            navItems.forEach((n) => n.classList.remove("active"));
+            this.classList.add("active");
 
-      // Update panels with smooth transition
-      contents.forEach(p => {
-        p.classList.remove('active');
-      });
+            // Update panels with smooth transition
+            contents.forEach((p) => {
+              p.classList.remove("active");
+            });
 
-      // Force reflow for smooth transition
-      void targetPanel.offsetWidth;
-      targetPanel.classList.add('active');
-    });
-  });
-}
+            // Force reflow for smooth transition
+            void targetPanel.offsetWidth;
+            targetPanel.classList.add("active");
+          });
+        });
+      }
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    PWA SETUP
    ═══════════════════════════════════════════════════════════════ */
 
-let deferredPrompt = null;
+      let deferredPrompt = null;
 
-function setupPWA() {
-  const banner = DOM.pwaBanner;
-  const installBtn = DOM.pwaInstallBtn;
-  const dismissBtn = DOM.pwaDismissBtn;
+      function setupPWA() {
+        const banner = DOM.pwaBanner;
+        const installBtn = DOM.pwaInstallBtn;
+        const dismissBtn = DOM.pwaDismissBtn;
 
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (banner && !localStorage.getItem('pwa-dismissed')) {
-      banner.classList.add('show');
-    }
-  });
+        window.addEventListener("beforeinstallprompt", (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          if (banner && !localStorage.getItem("pwa-dismissed")) {
+            banner.classList.add("show");
+          }
+        });
 
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      banner.classList.remove('show');
-    });
-  }
+        if (installBtn) {
+          installBtn.addEventListener("click", async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            banner.classList.remove("show");
+          });
+        }
 
-  if (dismissBtn) {
-    dismissBtn.addEventListener('click', () => {
-      banner.classList.remove('show');
-      localStorage.setItem('pwa-dismissed', '1');
-    });
-  }
+        if (dismissBtn) {
+          dismissBtn.addEventListener("click", () => {
+            banner.classList.remove("show");
+            localStorage.setItem("pwa-dismissed", "1");
+          });
+        }
 
-  window.addEventListener('appinstalled', () => {
-    if (banner) banner.classList.remove('show');
-  });
-}
+        window.addEventListener("appinstalled", () => {
+          if (banner) banner.classList.remove("show");
+        });
+      }
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    SERVICE WORKER
    ═══════════════════════════════════════════════════════════════ */
 
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .catch(err => console.warn('[NuCal PWA] SW failed:', err));
-    });
-  }
-}
+      function registerServiceWorker() {
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker
+              .register("./sw.js")
+              .catch((err) => console.warn("[NuCal PWA] SW failed:", err));
+          });
+        }
+      }
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    EVENT HANDLERS (exposed globally)
    ═══════════════════════════════════════════════════════════════ */
 
-window.handlers = {
-  // Isotope
-  isotopeChange: onIsotopeChange,
+      window.handlers = {
+        // Isotope
+        isotopeChange: onIsotopeChange,
 
-  // Input utilities
-  commaKey: handleCommaKey,
-  sanitizeActivity: sanitizeActivityInput,
-  normalizeDot: normalizeTrailingDot,
-  sanitizeTime: sanitizeTimeInput,
-  timeBlur: handleTimeBlur,
+        // Input utilities
+        commaKey: handleCommaKey,
+        sanitizeActivity: sanitizeActivityInput,
+        normalizeDot: normalizeTrailingDot,
+        sanitizeTime: sanitizeTimeInput,
+        timeBlur: handleTimeBlur,
 
-  // Tab 1
-  decay: calcDecay,
-  saveDecay: saveDecayResult,
+        // Tab 1
+        decay: calcDecay,
+        saveDecay: saveDecayResult,
 
-  // Tab 2
-  realtime: calcRealtime,
-  saveRealtime: saveRealtimeResult,
-  reverse: calcReverse,
+        // Tab 2
+        realtime: calcRealtime,
+        saveRealtime: saveRealtimeResult,
+        reverse: calcReverse,
 
-  // Tab 3
-  halflife: calcHalflife,
-  saveHalflife: saveHalflifeResult,
+        // Tab 3
+        halflife: calcHalflife,
+        saveHalflife: saveHalflifeResult,
 
-  // History
-  toggleHistory: toggleHistory,
-  clearRecent: clearRecent,
-};
+        // History
+        toggleHistory: toggleHistory,
+        clearRecent: clearRecent,
+      };
 
-/* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
    INITIALIZATION
    ═══════════════════════════════════════════════════════════════ */
 
-function init() {
-  // Render recent history
-  renderRecent();
+      function init() {
+        // Render recent history
+        renderRecent();
 
-  // Initialize chart
-  clearChart();
-
-  // Build quick table
-  buildQuickTable(0, DOM.dUnit.value);
-
-  // Apply isotope
-  onIsotopeChange();
-
-  // Init history content closed
-  const hc = DOM.historyContent;
-  if (hc) {
-    hc.style.maxHeight = '0px';
-    hc.setAttribute('aria-hidden', 'true');
-    hc.inert = true;
-  }
-
-  // Setup tabs (new nav)
-  initTabs();
-
-  // Setup PWA
-  setupPWA();
-  registerServiceWorker();
-
-  // Resize handler for chart
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      const a0 = parseFloat(DOM.dA0.value);
-      const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
-      const uKey = DOM.dUnit.value;
-      if (isFinite(a0) && a0 > 0) {
-        drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
-      } else {
+        // Initialize chart
         clearChart();
-      }
-    }, 120);
-  });
-}
 
-// Run initialization
-init();
-</script>
-</body>
+        // Build quick table
+        buildQuickTable(0, DOM.dUnit.value);
+
+        // Apply isotope
+        onIsotopeChange();
+
+        // Init history content closed
+        const hc = DOM.historyContent;
+        if (hc) {
+          hc.style.maxHeight = "0px";
+          hc.setAttribute("aria-hidden", "true");
+          hc.inert = true;
+        }
+
+        // Setup tabs (new nav)
+        initTabs();
+
+        // Setup PWA
+        setupPWA();
+        registerServiceWorker();
+
+        // Resize handler for chart
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            const a0 = parseFloat(DOM.dA0.value);
+            const t = toMinutes(DOM.dTime.value, DOM.dTimeUnit.value);
+            const uKey = DOM.dUnit.value;
+            if (isFinite(a0) && a0 > 0) {
+              drawDecayChart({ a0, tCurrent: t, unitKey: uKey });
+            } else {
+              clearChart();
+            }
+          }, 120);
+        });
+      }
+
+      // Run initialization
+      init();
+    </script>
+  </body>
 </html>
